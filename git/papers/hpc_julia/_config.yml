@@ -1,0 +1,33 @@
+#######################################################################################
+# Book settings
+title : HPC exercise in Julia
+author: Hiroshi Shinaoka
+
+# Information about where the book exists on the web
+description: >-
+  An exercise course on high performance computing in Julia
+
+#######################################################################################
+# Execution settings
+execute:
+  execute_notebooks           : cache
+
+#######################################################################################
+# HTML-specific settings
+html:
+  home_page_in_navbar         : false
+
+# #######################################################################################
+# Interact link settings
+notebook_interface            : "jupyterlab"
+
+#######################################################################################
+# Launch button settings
+repository:
+  url                         : https://github.com/shinaoka/hpc_julia.git
+  path_to_book                : ""
+
+latex:
+  latex_engine                : "xelatex"
+  latex_documents:
+    targetname: book.tex
