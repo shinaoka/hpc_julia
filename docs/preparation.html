@@ -148,7 +148,24 @@
             <i class="fas fa-list"></i> Contents
         </div>
         <nav id="bd-toc-nav">
-            
+            <ul class="nav section-nav flex-column">
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#id2">
+   必要な環境
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#id3">
+   インストール手順
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#id4">
+   予習
+  </a>
+ </li>
+</ul>
+
         </nav>
     </div>
 </div>
@@ -159,31 +176,51 @@
                 
   <div class="section" id="id1">
 <h1>準備<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="id2">
+<h2>必要な環境<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
 <p>講義に必要な環境は以下の通り。Juliaの公式バイナリ、Julia Proなど使えます。</p>
 <ul class="simple">
 <li><p>Julia 1.5以上</p></li>
 <li><p>Jupyter notebook</p></li>
-<li><p>最初からあると良いライブラリ: PyPlot.jl, BenchmarkTools.jlなど</p></li>
-<li><p>後で並列計算に必要なもの: MPI.jl ( MPIライブラリOpenMPIとかMPICHを先にインストールする必要あり。Macならbrew install openmpi)</p></li>
+<li><p>PyPlot.jl, BenchmarkTools.jlなど</p></li>
 </ul>
-<p>私は、以下のようなファイルをつくっておいて、Juliaのバージョンアップグレード時に毎回実行して、
-必要なパッケージを再インストールしています。
-PyPlotはPythonのmatplotlibを呼びます。すでにPython環境を設定している場合は、1行目で対応するPythonのインタプリタを指定すること。</p>
+<!-- 
+* 後で並列計算に必要なもの: MPI.jl (MPIライブラリOpenMPIとかMPICHを先にインストールする必要あり。Macならbrew install openmpi) 
+-->
+</div>
+<div class="section" id="id3">
+<h2>インストール手順<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h2>
+<p>詳しくない人はblueqat (量子計算のクラウドサービス)を使うことをお勧めします。
+Juliaの公式バイナリを使う場合には、
+<a class="reference external" href="https://julialang.org/downloads/platform">プラットフォーム毎のインストール手引き</a>をよく読むこと。</p>
+<p>すでにPython (matplotlib含む)とJupyter notebook/labがインストールされているとします。
+以下のファイル (pkg_install.jl)をJuliaで実行すると、とりあえず必要なライブラリをJuliaに導入できます。
+1行目のPythonインタプリタへのパスは自分の環境に合わせて変更すること (which pythonをシェルで実行すれば分かります)。</p>
 <div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="nb">ENV</span><span class="p">[</span><span class="s">&quot;PYTHON&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&quot;/usr/local/var/pyenv/shims/python&quot;</span>
 <span class="k">using</span> <span class="n">Pkg</span>
-
+<span class="n">Pkg</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s">&quot;IJulia&quot;</span><span class="p">)</span>
 <span class="n">Pkg</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s">&quot;PyCall&quot;</span><span class="p">)</span>
-<span class="n">Pkg</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s">&quot;MPI&quot;</span><span class="p">)</span> <span class="c"># require MPI C libraries</span>
+<span class="n">Pkg</span><span class="o">.</span><span class="n">build</span><span class="p">(</span><span class="s">&quot;PyCall&quot;</span><span class="p">)</span>
 <span class="n">Pkg</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s">&quot;BenchmarkTools&quot;</span><span class="p">)</span>
 <span class="n">Pkg</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s">&quot;StaticArrays&quot;</span><span class="p">)</span>
 <span class="n">Pkg</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s">&quot;CPUTime&quot;</span><span class="p">)</span>
 <span class="n">Pkg</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s">&quot;PyPlot&quot;</span><span class="p">)</span>
+<span class="n">Pkg</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s">&quot;Plots&quot;</span><span class="p">)</span>
 <span class="n">Pkg</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s">&quot;PyCall&quot;</span><span class="p">)</span>
 <span class="n">Pkg</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s">&quot;HDF5&quot;</span><span class="p">)</span>
 <span class="n">Pkg</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s">&quot;Profile&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>「1から始めるJuliaプログラミング」の2章（2.8, 2.9, .2.10は飛ばしても良いかも)を読みましょう。</p>
+<p>実行はシェル上でこんな感じ。</p>
+<div class="highlight-bath notranslate"><div class="highlight"><pre><span></span>julia pkg_install.jl
+</pre></div>
+</div>
+</div>
+<div class="section" id="id4">
+<h2>予習<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h2>
+<p>「1から始めるJuliaプログラミング」の2章（2.8, 2.9, .2.10は飛ばしても良いかも)を読んで、
+Jupyter notebook上で実行してみましょう。</p>
+</div>
 </div>
 
     <script type="text/x-thebe-config">
