@@ -6,7 +6,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>HPC exercise in Julia &#8212; HPC exercise in Julia</title>
+    <title>古典モンテカルロ編 &#8212; HPC exercise in Julia</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/all.min.css" integrity="sha384-KA6wR/X5RY4zFAHpv/CnoG2UW1uogYfdnP67Uv7eULvTveboZJg0qUpmJZb5VqzN" crossorigin="anonymous">
     <link href="../_static/css/index.css" rel="stylesheet">
     <link rel="stylesheet" href="../_static/sphinx-book-theme.css" type="text/css" />
@@ -36,7 +36,7 @@
     <script async="async" src="../_static/sphinx-thebe.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="準備" href="preparation.html" />
+    <link rel="prev" title="準備" href="preparation.html" />
 
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="docsearch:language" content="en">
@@ -67,14 +67,14 @@
 </form>
 
 <nav class="bd-links" id="bd-docs-nav" aria-label="Main navigation">
-  <ul class="nav sidenav_l1">
+  <ul class="current nav sidenav_l1">
  <li class="toctree-l1">
   <a class="reference internal" href="preparation.html">
    準備
   </a>
  </li>
- <li class="toctree-l1">
-  <a class="reference internal" href="mc.html">
+ <li class="toctree-l1 current active">
+  <a class="current reference internal" href="#">
    古典モンテカルロ編
   </a>
  </li>
@@ -120,7 +120,7 @@
         <!-- ipynb file if we had a myst markdown file -->
         
         <!-- Download raw file -->
-        <a class="dropdown-buttons" href="../_sources/docs/index.md"><button type="button"
+        <a class="dropdown-buttons" href="../_sources/docs/mc.md"><button type="button"
                 class="btn btn-secondary topbarbtn" title="Download source file" data-toggle="tooltip"
                 data-placement="left">.md</button></a>
         <!-- Download PDF via print -->
@@ -156,13 +156,13 @@
         
               <div>
                 
-  <div class="section" id="hpc-exercise-in-julia">
-<h1>HPC exercise in Julia<a class="headerlink" href="#hpc-exercise-in-julia" title="Permalink to this headline">¶</a></h1>
-<p>埼玉大学の計算物理に関する大学院講義の補助資料です。
-外部資料（書籍「1から始めるJuliaプログラミング」、Web上の資料)へのリンクや、
-補足的な資料を提供します。</p>
-<div class="toctree-wrapper compound">
-</div>
+  <div class="section" id="id1">
+<h1>古典モンテカルロ編<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h1>
+<p>最終的には、古典ハイゼンベルグスピン模型を解くマルコフ連鎖モンテカルロプログラムを書いて、
+それを最適化することです。
+これを通して、疑似乱数、メモリアクセスの順序、メモリアロケーションの性能への影響を学びます。</p>
+<p>マルコフ連鎖モンテカルロ法を知らない人は、川島先生の講義ノート<a class="reference external" href="https://repository.kulib.kyoto-u.ac.jp/dspace/bitstream/2433/111025/1/KJ00004880823.pdf">物性物理におけるモンテカルロ法</a>の1.1〜1.8章を参考にしましょう。</p>
+<p>2次元イジングスピン模型（正方格子・最近接相互作用のみ)に関しては、<a class="reference external" href="https://nbviewer.jupyter.org/gist/genkuroki/1df6e9cf580ae984f38df09551643679">黒木玄さんによるコード</a>が公開されています。</p>
 </div>
 
     <script type="text/x-thebe-config">
@@ -193,7 +193,7 @@
     
     <div class='prev-next-bottom'>
         
-    <a class='right-next' id="next-link" href="preparation.html" title="next page">準備</a>
+    <a class='left-prev' id="prev-link" href="preparation.html" title="previous page">準備</a>
 
     </div>
     <footer class="footer mt-5 mt-md-0">
