@@ -2,4 +2,4 @@
 - file: docs/index
   sections:
     - file: docs/preparation
-    - file: docs/jupyter_test
+    - file: docs/mc

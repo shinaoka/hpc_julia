@@ -1,1 +1,3 @@
 # Jupyter test
+
+using Plots
