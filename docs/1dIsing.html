@@ -275,19 +275,19 @@ We adopt <span class="math notranslate nohighlight">\(S_i=1\)</span> with a prob
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  0.000436 seconds (1 allocation: 128 bytes)
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  0.000662 seconds (1 allocation: 128 bytes)
 </pre></div>
 </div>
 <div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>BenchmarkTools.Trial: 
   memory estimate:  128 bytes
   allocs estimate:  1
   --------------
-  minimum time:     414.421 μs (0.00% GC)
-  median time:      433.919 μs (0.00% GC)
-  mean time:        468.099 μs (0.00% GC)
-  maximum time:     1.398 ms (0.00% GC)
+  minimum time:     656.871 μs (0.00% GC)
+  median time:      659.256 μs (0.00% GC)
+  mean time:        664.074 μs (0.00% GC)
+  maximum time:     1.083 ms (0.00% GC)
   --------------
-  samples:          10000
+  samples:          7521
   evals/sample:     1
 </pre></div>
 </div>
@@ -370,10 +370,10 @@ We adopt <span class="math notranslate nohighlight">\(S_i=1\)</span> with a prob
 </div>
 </div>
 </div>
+<p>OK, create an updater object and run it, and check if a spin state is updated correctly.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="c"># OK, run the updater once and check if the spin state is updated correctly.</span>
-<span class="n">ss</span> <span class="o">=</span> <span class="n">MC</span><span class="o">.</span><span class="n">SpinState</span><span class="p">(</span><span class="n">s0</span><span class="p">)</span>
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="n">ss</span> <span class="o">=</span> <span class="n">MC</span><span class="o">.</span><span class="n">SpinState</span><span class="p">(</span><span class="n">s0</span><span class="p">)</span>
 <span class="n">MC</span><span class="o">.</span><span class="n">update!</span><span class="p">(</span><span class="n">ss</span><span class="p">,</span> <span class="n">β</span><span class="p">,</span> <span class="n">niters</span><span class="p">,</span> <span class="n">rng</span><span class="p">)</span>
 <span class="n">MC</span><span class="o">.</span><span class="n">sanity_check</span><span class="p">(</span><span class="n">ss</span><span class="p">)</span>
 </pre></div>
@@ -391,12 +391,12 @@ We adopt <span class="math notranslate nohighlight">\(S_i=1\)</span> with a prob
   memory estimate:  128 bytes
   allocs estimate:  1
   --------------
-  minimum time:     442.097 μs (0.00% GC)
-  median time:      496.197 μs (0.00% GC)
-  mean time:        510.269 μs (0.00% GC)
-  maximum time:     1.161 ms (0.00% GC)
+  minimum time:     712.874 μs (0.00% GC)
+  median time:      719.099 μs (0.00% GC)
+  mean time:        731.856 μs (0.00% GC)
+  maximum time:     3.983 ms (0.00% GC)
   --------------
-  samples:          9795
+  samples:          6828
   evals/sample:     1
 </pre></div>
 </div>
