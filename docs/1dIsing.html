@@ -6,7 +6,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Monte Carlo simulation for 1D Ising model &#8212; HPC exercise in Julia</title>
+    <title>1D Ising model &#8212; HPC exercise in Julia</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/all.min.css" integrity="sha384-KA6wR/X5RY4zFAHpv/CnoG2UW1uogYfdnP67Uv7eULvTveboZJg0qUpmJZb5VqzN" crossorigin="anonymous">
     <link href="../_static/css/index.css" rel="stylesheet">
     <link rel="stylesheet" href="../_static/sphinx-book-theme.css" type="text/css" />
@@ -38,7 +38,7 @@
     <script async="async" src="../_static/sphinx-thebe.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="prev" title="古典モンテカルロ編" href="mc.html" />
+    <link rel="prev" title="Overview" href="mc.html" />
 
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="docsearch:language" content="en">
@@ -77,24 +77,24 @@
 <ul class="nav sidenav_l1">
  <li class="toctree-l1">
   <a class="reference internal" href="preparation.html">
-   準備
+   Preparation
   </a>
  </li>
 </ul>
 <p class="caption">
  <span class="caption-text">
-  My first part
+  Classical Monte Carlo simulation
  </span>
 </p>
 <ul class="current nav sidenav_l1">
  <li class="toctree-l1">
   <a class="reference internal" href="mc.html">
-   古典モンテカルロ編
+   Overview
   </a>
  </li>
  <li class="toctree-l1 current active">
   <a class="current reference internal" href="#">
-   Monte Carlo simulation for 1D Ising model
+   1D Ising model
   </a>
  </li>
 </ul>
@@ -199,6 +199,11 @@
    More complex implementation with measurement
   </a>
  </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#exercise">
+   Exercise
+  </a>
+ </li>
 </ul>
 
         </nav>
@@ -209,8 +214,8 @@
         
               <div>
                 
-  <div class="section" id="monte-carlo-simulation-for-1d-ising-model">
-<h1>Monte Carlo simulation for 1D Ising model<a class="headerlink" href="#monte-carlo-simulation-for-1d-ising-model" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="d-ising-model">
+<h1>1D Ising model<a class="headerlink" href="#d-ising-model" title="Permalink to this headline">¶</a></h1>
 <p>We consider the Hamiltonian</p>
 <div class="math notranslate nohighlight">
 \[
@@ -398,6 +403,12 @@ We adopt <span class="math notranslate nohighlight">\(S_i=1\)</span> with a prob
 </div>
 </div>
 </div>
+<div class="section" id="exercise">
+<h2>Exercise<a class="headerlink" href="#exercise" title="Permalink to this headline">¶</a></h2>
+<p>Implement measurement of the magnetization and specific heat
+and compare the results with the exact ones!
+(To do) Include analytic expressions</p>
+</div>
 </div>
 
     <script type="text/x-thebe-config">
@@ -428,7 +439,7 @@ We adopt <span class="math notranslate nohighlight">\(S_i=1\)</span> with a prob
     
     <div class='prev-next-bottom'>
         
-    <a class='left-prev' id="prev-link" href="mc.html" title="previous page">古典モンテカルロ編</a>
+    <a class='left-prev' id="prev-link" href="mc.html" title="previous page">Overview</a>
 
     </div>
     <footer class="footer mt-5 mt-md-0">
