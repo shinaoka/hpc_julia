@@ -1,5 +1,11 @@
 # - file: README
 - file: docs/index
-  sections:
-    - file: docs/preparation
-    - file: docs/mc
+
+- part: Introduction
+  chapters:
+  - file: docs/preparation
+
+- part: Classical Monte Carlo simulation
+  chapters:
+  - file: docs/mc
+  - file: docs/1dIsing
