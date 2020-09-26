@@ -1,0 +1,453 @@
+
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Monte Carlo simulation for 1D Ising model &#8212; HPC exercise in Julia</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/all.min.css" integrity="sha384-KA6wR/X5RY4zFAHpv/CnoG2UW1uogYfdnP67Uv7eULvTveboZJg0qUpmJZb5VqzN" crossorigin="anonymous">
+    <link href="../_static/css/index.css" rel="stylesheet">
+    <link rel="stylesheet" href="../_static/sphinx-book-theme.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/mystnb.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-thebe.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/spanels-index--0afa1ebdab0bb23b98b56d34c23d9f57.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/spanels-variables--ffc7f74dcb1b9eecba2dbcbc22818714.css" />
+    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/language_data.js"></script>
+    <script src="../_static/togglebutton.js"></script>
+    <script src="../_static/clipboard.min.js"></script>
+    <script src="../_static/copybutton.js"></script>
+    <script src="../_static/sphinx-book-theme.js"></script>
+    <script >var togglebuttonSelector = '.toggle, .admonition.dropdown, .tag_hide_input div.cell_input, .tag_hide-input div.cell_input, .tag_hide_output div.cell_output, .tag_hide-output div.cell_output, .tag_hide_cell.cell, .tag_hide-cell.cell';</script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["\\(", "\\)"]], "displayMath": [["\\[", "\\]"]], "processRefs": false, "processEnvironments": false}})</script>
+    <script async="async" src="https://unpkg.com/thebelab@latest/lib/index.js"></script>
+    <script >
+        const thebe_selector = ".thebe"
+        const thebe_selector_input = "pre"
+        const thebe_selector_output = ".output"
+    </script>
+    <script async="async" src="../_static/sphinx-thebe.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="prev" title="古典モンテカルロ編" href="mc.html" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="docsearch:language" content="en">
+
+
+
+  </head>
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="80">
+    
+
+    <div class="container-xl">
+      <div class="row">
+          
+<div class="col-12 col-md-3 bd-sidebar site-navigation show" id="site-navigation">
+    
+        <div class="navbar-brand-box">
+<a class="navbar-brand text-wrap" href="../index.html">
+  
+  
+  <h1 class="site-logo" id="site-title">HPC exercise in Julia</h1>
+  
+</a>
+</div>
+
+<form class="bd-search d-flex align-items-center" action="../search.html" method="get">
+  <i class="icon fas fa-search"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search this book..." aria-label="Search this book..." autocomplete="off" >
+</form>
+
+<nav class="bd-links" id="bd-docs-nav" aria-label="Main navigation">
+  <p class="caption">
+ <span class="caption-text">
+  Introduction
+ </span>
+</p>
+<ul class="nav sidenav_l1">
+ <li class="toctree-l1">
+  <a class="reference internal" href="preparation.html">
+   準備
+  </a>
+ </li>
+</ul>
+<p class="caption">
+ <span class="caption-text">
+  My first part
+ </span>
+</p>
+<ul class="current nav sidenav_l1">
+ <li class="toctree-l1">
+  <a class="reference internal" href="mc.html">
+   古典モンテカルロ編
+  </a>
+ </li>
+ <li class="toctree-l1 current active">
+  <a class="current reference internal" href="#">
+   Monte Carlo simulation for 1D Ising model
+  </a>
+ </li>
+</ul>
+
+</nav>
+
+ <!-- To handle the deprecated key -->
+
+<div class="navbar_extra_footer">
+  Powered by <a href="https://jupyterbook.org">Jupyter Book</a>
+</div>
+
+</div>
+
+
+          
+
+
+          
+<main class="col py-md-3 pl-md-4 bd-content overflow-auto" role="main">
+    
+    <div class="row topbar fixed-top container-xl">
+    <div class="col-12 col-md-3 bd-topbar-whitespace site-navigation show">
+    </div>
+    <div class="col pl-2 topbar-main">
+        
+        <button id="navbar-toggler" class="navbar-toggler ml-0" type="button" data-toggle="collapse"
+            data-toggle="tooltip" data-placement="bottom" data-target=".site-navigation" aria-controls="navbar-menu"
+            aria-expanded="true" aria-label="Toggle navigation" aria-controls="site-navigation"
+            title="Toggle navigation" data-toggle="tooltip" data-placement="left">
+            <i class="fas fa-bars"></i>
+            <i class="fas fa-arrow-left"></i>
+            <i class="fas fa-arrow-up"></i>
+        </button>
+        
+        <div class="dropdown-buttons-trigger">
+    <button id="dropdown-buttons-trigger" class="btn btn-secondary topbarbtn" aria-label="Download this page"><i
+            class="fas fa-download"></i></button>
+
+    
+    <div class="dropdown-buttons">
+        <!-- ipynb file if we had a myst markdown file -->
+        
+        <!-- Download raw file -->
+        <a class="dropdown-buttons" href="../_sources/docs/1dIsing.ipynb"><button type="button"
+                class="btn btn-secondary topbarbtn" title="Download source file" data-toggle="tooltip"
+                data-placement="left">.ipynb</button></a>
+        <!-- Download PDF via print -->
+        <button type="button" id="download-print" class="btn btn-secondary topbarbtn" title="Print to PDF"
+            onClick="window.print()" data-toggle="tooltip" data-placement="left">.pdf</button>
+    </div>
+    
+</div>
+        <!-- Source interaction buttons -->
+
+
+        <!-- Full screen (wrap in <a> to have style consistency -->
+        <a class="full-screen-button"><button type="button" class="btn btn-secondary topbarbtn" data-toggle="tooltip"
+                data-placement="bottom" onclick="toggleFullScreen()" title="Fullscreen mode"><i
+                    class="fas fa-expand"></i></button></a>
+
+        <!-- Launch buttons -->
+
+<div class="dropdown-buttons-trigger">
+    <button id="dropdown-buttons-trigger" class="btn btn-secondary topbarbtn"
+        aria-label="Launch interactive content"><i class="fas fa-rocket"></i></button>
+    <div class="dropdown-buttons">
+        
+        <a class="binder-button" href="https://mybinder.org/v2/gh/shinaoka/hpc_julia.git/master?urlpath=tree/docs/1dIsing.ipynb"><button type="button"
+                class="btn btn-secondary topbarbtn" title="Launch Binder" data-toggle="tooltip"
+                data-placement="left"><img class="binder-button-logo"
+                    src="../_static/images/logo_binder.svg"
+                    alt="Interact on binder">Binder</button></a>
+        
+        
+        
+        <a class="colab-button" href="https://colab.research.google.com/github/shinaoka/hpc_julia.git/blob/master/docs/1dIsing.ipynb"><button type="button" class="btn btn-secondary topbarbtn"
+                title="Launch Colab" data-toggle="tooltip" data-placement="left"><img class="colab-button-logo"
+                    src="../_static/images/logo_colab.png"
+                    alt="Interact on Colab">Colab</button></a>
+        
+        
+    </div>
+</div>
+
+    </div>
+
+    <!-- Table of contents -->
+    <div class="d-none d-md-block col-md-2 bd-toc show">
+        <div class="tocsection onthispage pt-5 pb-3">
+            <i class="fas fa-list"></i> Contents
+        </div>
+        <nav id="bd-toc-nav">
+            <ul class="nav section-nav flex-column">
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#first-simple-implementation">
+   First simple implementation
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#more-complex-implementation-with-measurement">
+   More complex implementation with measurement
+  </a>
+ </li>
+</ul>
+
+        </nav>
+    </div>
+</div>
+    <div id="main-content" class="row">
+        <div class="col-12 col-md-9 pl-md-3 pr-md-0">
+        
+              <div>
+                
+  <div class="section" id="monte-carlo-simulation-for-1d-ising-model">
+<h1>Monte Carlo simulation for 1D Ising model<a class="headerlink" href="#monte-carlo-simulation-for-1d-ising-model" title="Permalink to this headline">¶</a></h1>
+<p>We consider the Hamiltonian</p>
+<div class="math notranslate nohighlight">
+\[
+\mathcal{H} = -\sum_i S_i S_{i+1}.
+\]</div>
+<p>We are going to update <span class="math notranslate nohighlight">\(S_i\)</span>.
+We consider two states where <span class="math notranslate nohighlight">\(S_i=\pm 1\)</span> and the other spins are the same as the current state.
+The energy difference of these two states can be computed as <span class="math notranslate nohighlight">\(\Delta E = E_\uparrow - E_\downarrow = - 2h\)</span>,
+where <span class="math notranslate nohighlight">\(h = S_{i-1} + S_{i+1}\)</span>.
+We adopt <span class="math notranslate nohighlight">\(S_i=1\)</span> with a probability of <span class="math notranslate nohighlight">\(1/(1+\exp(\beta \Delta E ))\)</span>.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="nd">@show</span> <span class="nb">VERSION</span>
+<span class="k">using</span> <span class="n">BenchmarkTools</span><span class="p">,</span> <span class="n">Random</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>VERSION = v&quot;1.5.2&quot;
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="first-simple-implementation">
+<h2>First simple implementation<a class="headerlink" href="#first-simple-implementation" title="Permalink to this headline">¶</a></h2>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="k">function</span> <span class="n">ising1d!</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">β</span><span class="p">,</span> <span class="n">niters</span><span class="p">,</span> <span class="n">rng</span><span class="p">)</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="n">length</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+    <span class="n">min_h</span> <span class="o">=</span> <span class="o">-</span><span class="mi">2</span>
+    <span class="n">max_h</span> <span class="o">=</span> <span class="mi">2</span>
+    <span class="n">prob</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="mi">1</span><span class="o">+</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="o">*</span><span class="n">β</span><span class="o">*</span><span class="n">h</span><span class="p">))</span> <span class="k">for</span> <span class="n">h</span> <span class="kp">in</span> <span class="n">min_h</span><span class="o">:</span><span class="n">max_h</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">iter</span> <span class="kp">in</span> <span class="mi">1</span><span class="o">:</span><span class="n">niters</span><span class="p">,</span> <span class="n">i</span> <span class="kp">in</span> <span class="mi">1</span><span class="o">:</span><span class="n">n</span>
+        <span class="n">sl</span> <span class="o">=</span> <span class="n">s</span><span class="p">[</span><span class="n">ifelse</span><span class="p">(</span><span class="n">i</span> <span class="o">==</span> <span class="mi">1</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">)]</span>
+        <span class="n">sr</span> <span class="o">=</span> <span class="n">s</span><span class="p">[</span><span class="n">ifelse</span><span class="p">(</span><span class="n">i</span> <span class="o">==</span> <span class="n">n</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)]</span>
+        <span class="c"># h = -2, 0, 2</span>
+        <span class="n">h</span> <span class="o">=</span> <span class="n">sl</span> <span class="o">+</span> <span class="n">sr</span>
+        <span class="n">si_old</span> <span class="o">=</span> <span class="n">s</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="n">s</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">ifelse</span><span class="p">(</span><span class="n">rand</span><span class="p">(</span><span class="n">rng</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">prob</span><span class="p">[</span><span class="n">h</span><span class="o">-</span><span class="n">min_h</span><span class="o">+</span><span class="mi">1</span><span class="p">],</span> <span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">end</span>
+<span class="k">end</span>
+
+<span class="n">n</span> <span class="o">=</span> <span class="mi">100</span>
+<span class="n">rng</span> <span class="o">=</span> <span class="kt">MersenneTwister</span><span class="p">(</span><span class="mi">4649</span><span class="p">)</span>
+<span class="n">s0</span> <span class="o">=</span> <span class="n">rand</span><span class="p">(</span><span class="n">rng</span><span class="p">,</span> <span class="kt">Int8</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">n</span><span class="p">)</span>
+<span class="n">β</span> <span class="o">=</span> <span class="mf">100.0</span>
+<span class="n">niters</span> <span class="o">=</span> <span class="mi">10</span><span class="o">^</span><span class="mi">3</span>
+
+<span class="n">s</span> <span class="o">=</span> <span class="n">copy</span><span class="p">(</span><span class="n">s0</span><span class="p">)</span>
+
+<span class="c"># Run once to compile the function</span>
+<span class="n">ising1d!</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">β</span><span class="p">,</span> <span class="n">niters</span><span class="p">,</span> <span class="n">rng</span><span class="p">)</span>
+
+<span class="nd">@time</span> <span class="n">ising1d!</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">β</span><span class="p">,</span> <span class="n">niters</span><span class="p">,</span> <span class="n">rng</span><span class="p">)</span>
+<span class="nd">@benchmark</span> <span class="n">ising1d!</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">β</span><span class="p">,</span> <span class="n">niters</span><span class="p">,</span> <span class="n">rng</span><span class="p">)</span> <span class="n">setup</span><span class="o">=</span><span class="p">(</span><span class="n">s</span> <span class="o">=</span> <span class="n">copy</span><span class="p">(</span><span class="n">s0</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  0.000535 seconds (1 allocation: 128 bytes)
+</pre></div>
+</div>
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>BenchmarkTools.Trial: 
+  memory estimate:  128 bytes
+  allocs estimate:  1
+  --------------
+  minimum time:     423.660 μs (0.00% GC)
+  median time:      443.892 μs (0.00% GC)
+  mean time:        489.261 μs (0.00% GC)
+  maximum time:     1.756 ms (0.00% GC)
+  --------------
+  samples:          10000
+  evals/sample:     1
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="more-complex-implementation-with-measurement">
+<h2>More complex implementation with measurement<a class="headerlink" href="#more-complex-implementation-with-measurement" title="Permalink to this headline">¶</a></h2>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="c"># Wrap everything with a module to allow redefition of type</span>
+<span class="k">module</span> <span class="n">MC</span>
+
+<span class="s">&quot;&quot;&quot;</span>
+<span class="s">Composite type to represent a spin state</span>
+<span class="s">&quot;&quot;&quot;</span>
+<span class="k">mutable</span> <span class="k">struct</span> <span class="n">SpinState</span>
+    <span class="n">num_spins</span><span class="o">::</span><span class="kt">Int</span>
+    <span class="n">s</span><span class="o">::</span><span class="kt">Array</span><span class="p">{</span><span class="kt">Int8</span><span class="p">,</span><span class="mi">1</span><span class="p">}</span>
+    <span class="n">energy</span><span class="o">::</span><span class="kt">Int</span>
+    <span class="n">tot_mag</span><span class="o">::</span><span class="kt">Int</span>
+<span class="k">end</span>
+
+<span class="s">&quot;&quot;&quot;</span>
+<span class="s">Energy</span>
+<span class="s">&quot;&quot;&quot;</span>
+<span class="k">function</span> <span class="n">energy</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="n">length</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+    <span class="o">-</span> <span class="n">sum</span><span class="p">((</span><span class="n">s</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="n">s</span><span class="p">[</span><span class="n">ifelse</span><span class="p">(</span><span class="n">i</span> <span class="o">==</span> <span class="n">n</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)]</span> <span class="k">for</span> <span class="n">i</span> <span class="kp">in</span> <span class="mi">1</span><span class="o">:</span><span class="n">n</span><span class="p">))</span>
+<span class="k">end</span>
+
+<span class="s">&quot;&quot;&quot;</span>
+<span class="s">Total magnetization</span>
+<span class="s">&quot;&quot;&quot;</span>
+<span class="n">total_magnetization</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="o">=</span> <span class="n">sum</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+
+<span class="s">&quot;&quot;&quot;</span>
+<span class="s">Constructor</span>
+<span class="s">&quot;&quot;&quot;</span>
+<span class="k">function</span> <span class="n">SpinState</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+    <span class="n">ss</span> <span class="o">=</span> <span class="n">SpinState</span><span class="p">(</span><span class="n">length</span><span class="p">(</span><span class="n">s</span><span class="p">),</span> <span class="n">copy</span><span class="p">(</span><span class="n">s</span><span class="p">),</span> <span class="n">energy</span><span class="p">(</span><span class="n">s</span><span class="p">),</span> <span class="n">total_magnetization</span><span class="p">(</span><span class="n">s</span><span class="p">))</span>
+    <span class="n">sanity_check</span><span class="p">(</span><span class="n">ss</span><span class="p">)</span>
+    <span class="n">ss</span>
+<span class="k">end</span>
+
+<span class="s">&quot;&quot;&quot;</span>
+<span class="s">Sanity check</span>
+<span class="s">&quot;&quot;&quot;</span>
+<span class="k">function</span> <span class="n">sanity_check</span><span class="p">(</span><span class="n">ss</span><span class="p">)</span>
+    <span class="nd">@assert</span> <span class="n">energy</span><span class="p">(</span><span class="n">ss</span><span class="o">.</span><span class="n">s</span><span class="p">)</span> <span class="o">==</span> <span class="n">ss</span><span class="o">.</span><span class="n">energy</span>
+    <span class="nd">@assert</span> <span class="n">total_magnetization</span><span class="p">(</span><span class="n">ss</span><span class="o">.</span><span class="n">s</span><span class="p">)</span> <span class="o">==</span> <span class="n">ss</span><span class="o">.</span><span class="n">tot_mag</span>
+<span class="k">end</span>
+
+<span class="s">&quot;&quot;&quot;</span>
+<span class="s">Take an object of SpinState as an input and update it in place.</span>
+<span class="s">&quot;&quot;&quot;</span>
+<span class="k">function</span> <span class="n">update!</span><span class="p">(</span><span class="n">ss</span><span class="p">,</span> <span class="n">β</span><span class="p">,</span> <span class="n">niters</span><span class="p">,</span> <span class="n">rng</span><span class="p">)</span>
+    <span class="n">min_h</span> <span class="o">=</span> <span class="o">-</span><span class="mi">2</span>
+    <span class="n">max_h</span> <span class="o">=</span> <span class="mi">2</span>
+    <span class="n">s</span> <span class="o">=</span> <span class="n">ss</span><span class="o">.</span><span class="n">s</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="n">ss</span><span class="o">.</span><span class="n">num_spins</span>
+    <span class="n">prob</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="mi">1</span><span class="o">+</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="o">*</span><span class="n">β</span><span class="o">*</span><span class="n">h</span><span class="p">))</span> <span class="k">for</span> <span class="n">h</span> <span class="kp">in</span> <span class="n">min_h</span><span class="o">:</span><span class="n">max_h</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">iter</span> <span class="kp">in</span> <span class="mi">1</span><span class="o">:</span><span class="n">niters</span><span class="p">,</span> <span class="n">i</span> <span class="kp">in</span> <span class="mi">1</span><span class="o">:</span><span class="n">n</span>
+        <span class="n">sl</span> <span class="o">=</span> <span class="n">s</span><span class="p">[</span><span class="n">ifelse</span><span class="p">(</span><span class="n">i</span> <span class="o">==</span> <span class="mi">1</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">)]</span>
+        <span class="n">sr</span> <span class="o">=</span> <span class="n">s</span><span class="p">[</span><span class="n">ifelse</span><span class="p">(</span><span class="n">i</span> <span class="o">==</span> <span class="n">n</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)]</span>
+        <span class="c"># h = -2, 0, 2</span>
+        <span class="n">h</span> <span class="o">=</span> <span class="n">sl</span> <span class="o">+</span> <span class="n">sr</span>
+        <span class="n">si_old</span> <span class="o">=</span> <span class="n">s</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="n">s</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">ifelse</span><span class="p">(</span><span class="n">rand</span><span class="p">(</span><span class="n">rng</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">prob</span><span class="p">[</span><span class="n">h</span><span class="o">-</span><span class="n">min_h</span><span class="o">+</span><span class="mi">1</span><span class="p">],</span> <span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+        
+        <span class="c"># Update observables with O(1) operations</span>
+        <span class="n">ss</span><span class="o">.</span><span class="n">energy</span> <span class="o">+=</span> <span class="p">(</span><span class="n">si_old</span> <span class="o">-</span> <span class="n">s</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">*</span> <span class="n">h</span>
+        <span class="n">ss</span><span class="o">.</span><span class="n">tot_mag</span> <span class="o">+=</span> <span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">si_old</span><span class="p">)</span>
+    <span class="k">end</span>
+<span class="k">end</span>
+
+<span class="k">end</span>
+<span class="p">;</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="c"># OK, run the updater once and check if the spin state is updated correctly.</span>
+<span class="n">ss</span> <span class="o">=</span> <span class="n">MC</span><span class="o">.</span><span class="n">SpinState</span><span class="p">(</span><span class="n">s0</span><span class="p">)</span>
+<span class="n">MC</span><span class="o">.</span><span class="n">update!</span><span class="p">(</span><span class="n">ss</span><span class="p">,</span> <span class="n">β</span><span class="p">,</span> <span class="n">niters</span><span class="p">,</span> <span class="n">rng</span><span class="p">)</span>
+<span class="n">MC</span><span class="o">.</span><span class="n">sanity_check</span><span class="p">(</span><span class="n">ss</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="nd">@benchmark</span> <span class="n">MC</span><span class="o">.</span><span class="n">update!</span><span class="p">(</span><span class="n">ss</span><span class="p">,</span> <span class="n">β</span><span class="p">,</span> <span class="n">niters</span><span class="p">,</span> <span class="n">rng</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>BenchmarkTools.Trial: 
+  memory estimate:  128 bytes
+  allocs estimate:  1
+  --------------
+  minimum time:     444.197 μs (0.00% GC)
+  median time:      465.954 μs (0.00% GC)
+  mean time:        514.705 μs (0.00% GC)
+  maximum time:     1.397 ms (0.00% GC)
+  --------------
+  samples:          9710
+  evals/sample:     1
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+    <script type="text/x-thebe-config">
+    {
+        requestKernel: true,
+        binderOptions: {
+            repo: "binder-examples/jupyter-stacks-datascience",
+            ref: "master",
+        },
+        codeMirrorConfig: {
+            theme: "abcdef",
+            mode: "julia-1.5"
+        },
+        kernelOptions: {
+            kernelName: "julia-1.5",
+            path: "./docs"
+        },
+        predefinedOutput: true
+    }
+    </script>
+    <script>kernelName = 'julia-1.5'</script>
+
+              </div>
+              
+        </div>
+    </div>
+    
+    
+    <div class='prev-next-bottom'>
+        
+    <a class='left-prev' id="prev-link" href="mc.html" title="previous page">古典モンテカルロ編</a>
+
+    </div>
+    <footer class="footer mt-5 mt-md-0">
+    <div class="container">
+      <p>
+        
+          By Hiroshi Shinaoka<br/>
+        
+            &copy; Copyright 2020.<br/>
+      </p>
+    </div>
+  </footer>
+</main>
+
+
+      </div>
+    </div>
+
+    <script src="../_static/js/index.js"></script>
+    
+  </body>
+</html>

@@ -1,0 +1,64 @@
+Traceback (most recent call last):
+  File "/usr/local/var/pyenv/versions/3.8.2/lib/python3.8/site-packages/jupyter_cache/executors/utils.py", line 51, in single_nb_execution
+    executenb(
+  File "/usr/local/var/pyenv/versions/3.8.2/lib/python3.8/site-packages/nbclient/client.py", line 1082, in execute
+    return NotebookClient(nb=nb, resources=resources, km=km, **kwargs).execute()
+  File "/usr/local/var/pyenv/versions/3.8.2/lib/python3.8/site-packages/nbclient/util.py", line 74, in wrapped
+    return just_run(coro(*args, **kwargs))
+  File "/usr/local/var/pyenv/versions/3.8.2/lib/python3.8/site-packages/nbclient/util.py", line 53, in just_run
+    return loop.run_until_complete(coro)
+  File "/usr/local/var/pyenv/versions/3.8.2/lib/python3.8/asyncio/base_events.py", line 616, in run_until_complete
+    return future.result()
+  File "/usr/local/var/pyenv/versions/3.8.2/lib/python3.8/site-packages/nbclient/client.py", line 535, in async_execute
+    await self.async_execute_cell(
+  File "/usr/local/var/pyenv/versions/3.8.2/lib/python3.8/site-packages/nbclient/client.py", line 827, in async_execute_cell
+    self._check_raise_for_error(cell, exec_reply)
+  File "/usr/local/var/pyenv/versions/3.8.2/lib/python3.8/site-packages/nbclient/client.py", line 735, in _check_raise_for_error
+    raise CellExecutionError.from_cell_and_msg(cell, exec_reply['content'])
+nbclient.exceptions.CellExecutionError: An error occurred while executing the following cell:
+------------------
+function ising1d!(s, β, niters, rng)
+    n = length(s)
+    min_h = -2
+    max_h = 2
+    prob = [1/(1+exp(-2*β*h)) for h in min_h:max_h]
+    for iter in 1:niters, i in 1:n
+        sl = s[ifelse(i == 1, n, i-1)]
+        sr = s[ifelse(i == n, 1, i+1)]
+        # h = -2, 0, 2
+        h = sl + sr
+        si_old = s[i]
+        s[i] = ifelse(rand(rng) < prob[h-min_h+1], +1, -1)
+    end
+end
+
+n = 100
+rng = MersenneTwister(4649)
+s0 = rand(rng, Int8[-1, 1], n)
+β = 100.0
+niters = 10^3
+
+s = copy(s0)
+
+# Run once to compile the function
+ising1d!(s, β, niters, rng)
+
+@time ising1d!(s, β, niters, rng)
+@benchmark ising1d!(s, β, niters, rng) setup=(s = copy(s₀))
+------------------
+
+UndefVarError: s₀ not defined
+
+Stacktrace:
+ [1] ##sample#256(::BenchmarkTools.Parameters) at /Users/hiroshi/.julia/packages/BenchmarkTools/eCEpo/src/execution.jl:373
+ [2] _run(::BenchmarkTools.Benchmark{Symbol("##benchmark#254")}, ::BenchmarkTools.Parameters; verbose::Bool, pad::String, kwargs::Base.Iterators.Pairs{Symbol,Integer,NTuple{4,Symbol},NamedTuple{(:samples, :evals, :gctrial, :gcsample),Tuple{Int64,Int64,Bool,Bool}}}) at /Users/hiroshi/.julia/packages/BenchmarkTools/eCEpo/src/execution.jl:405
+ [3] (::Base.var"#inner#2"{Base.Iterators.Pairs{Symbol,Integer,NTuple{5,Symbol},NamedTuple{(:verbose, :samples, :evals, :gctrial, :gcsample),Tuple{Bool,Int64,Int64,Bool,Bool}}},typeof(BenchmarkTools._run),Tuple{BenchmarkTools.Benchmark{Symbol("##benchmark#254")},BenchmarkTools.Parameters}})() at ./essentials.jl:713
+ [4] #invokelatest#1 at ./essentials.jl:714 [inlined]
+ [5] #run_result#37 at /Users/hiroshi/.julia/packages/BenchmarkTools/eCEpo/src/execution.jl:32 [inlined]
+ [6] run(::BenchmarkTools.Benchmark{Symbol("##benchmark#254")}, ::BenchmarkTools.Parameters; progressid::Nothing, nleaves::Float64, ndone::Float64, kwargs::Base.Iterators.Pairs{Symbol,Integer,NTuple{5,Symbol},NamedTuple{(:verbose, :samples, :evals, :gctrial, :gcsample),Tuple{Bool,Int64,Int64,Bool,Bool}}}) at /Users/hiroshi/.julia/packages/BenchmarkTools/eCEpo/src/execution.jl:94
+ [7] #warmup#45 at /Users/hiroshi/.julia/packages/BenchmarkTools/eCEpo/src/execution.jl:141 [inlined]
+ [8] warmup(::BenchmarkTools.Benchmark{Symbol("##benchmark#254")}) at /Users/hiroshi/.julia/packages/BenchmarkTools/eCEpo/src/execution.jl:141
+ [9] top-level scope at /Users/hiroshi/.julia/packages/BenchmarkTools/eCEpo/src/execution.jl:287
+ [10] include_string(::Function, ::Module, ::String, ::String) at ./loading.jl:1091
+LoadError: UndefVarError: s₀ not defined
+
