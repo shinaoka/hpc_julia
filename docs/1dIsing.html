@@ -6,7 +6,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>1D Ising model &#8212; HPC exercise in Julia</title>
+    <title>1Dイジング模型 &#8212; HPC exercise in Julia</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/all.min.css" integrity="sha384-KA6wR/X5RY4zFAHpv/CnoG2UW1uogYfdnP67Uv7eULvTveboZJg0qUpmJZb5VqzN" crossorigin="anonymous">
     <link href="../_static/css/index.css" rel="stylesheet">
     <link rel="stylesheet" href="../_static/sphinx-book-theme.css" type="text/css" />
@@ -38,7 +38,7 @@
     <script async="async" src="../_static/sphinx-thebe.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="prev" title="Overview" href="mc.html" />
+    <link rel="prev" title="概要" href="mc.html" />
 
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="docsearch:language" content="en">
@@ -89,12 +89,12 @@
 <ul class="current nav sidenav_l1">
  <li class="toctree-l1">
   <a class="reference internal" href="mc.html">
-   Overview
+   概要
   </a>
  </li>
  <li class="toctree-l1 current active">
   <a class="current reference internal" href="#">
-   1D Ising model
+   1Dイジング模型
   </a>
  </li>
 </ul>
@@ -190,13 +190,20 @@
         <nav id="bd-toc-nav">
             <ul class="nav section-nav flex-column">
  <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#first-simple-implementation">
-   First simple implementation
+  <a class="reference internal nav-link" href="#id1">
+   最初の実装
   </a>
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#id2">
+     演習問題
+    </a>
+   </li>
+  </ul>
  </li>
  <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#more-complex-implementation-with-measurement">
-   More complex implementation with measurement
+  <a class="reference internal nav-link" href="#id3">
+   物理量計測込みの実装
   </a>
  </li>
  <li class="toc-h2 nav-item toc-entry">
@@ -214,18 +221,19 @@
         
               <div>
                 
-  <div class="section" id="d-ising-model">
-<h1>1D Ising model<a class="headerlink" href="#d-ising-model" title="Permalink to this headline">¶</a></h1>
-<p>We consider the Hamiltonian</p>
+  <div class="section" id="d">
+<h1>1Dイジング模型<a class="headerlink" href="#d" title="Permalink to this headline">¶</a></h1>
+<p>ここでは次の1次元強磁性ハイゼンベルグ模型を考えます。</p>
 <div class="math notranslate nohighlight">
 \[
 \mathcal{H} = -\sum_i S_i S_{i+1}.
 \]</div>
-<p>We are going to update <span class="math notranslate nohighlight">\(S_i\)</span>.
-We consider two states where <span class="math notranslate nohighlight">\(S_i=\pm 1\)</span> and the other spins are the same as the current state.
-The energy difference of these two states can be computed as <span class="math notranslate nohighlight">\(\Delta E = E_\uparrow - E_\downarrow = - 2h\)</span>,
-where <span class="math notranslate nohighlight">\(h = S_{i-1} + S_{i+1}\)</span>.
-We adopt <span class="math notranslate nohighlight">\(S_i=1\)</span> with a probability of <span class="math notranslate nohighlight">\(1/(1+\exp(\beta \Delta E ))\)</span>.</p>
+<p>前章の解説に従って、<span class="math notranslate nohighlight">\(i\)</span>番目のスピンを更新するとき、
+2つの状態間のエネルギー差は<span class="math notranslate nohighlight">\(\Delta E = E_\uparrow - E_\downarrow = - 2h\)</span>
+と計算出来ます。
+ここで、<span class="math notranslate nohighlight">\(h = S_{i-1} + S_{i+1}\)</span>は<span class="math notranslate nohighlight">\(i\)</span>番目のサイト以外のスピンが、<span class="math notranslate nohighlight">\(i\)</span>番目のスピンに及ぼす有効磁場です。
+最後に、<span class="math notranslate nohighlight">\(1/(1+\exp(\beta \Delta E ))\)</span>の確率で、<span class="math notranslate nohighlight">\(S_i=1\)</span>を採択します。</p>
+<p>なお、指数関数の計算は重いので（かけ算とかに比べ）、予め指数関数の値は計算して保存しておきます。</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="nd">@show</span> <span class="nb">VERSION</span>
@@ -239,8 +247,15 @@ We adopt <span class="math notranslate nohighlight">\(S_i=1\)</span> with a prob
 </div>
 </div>
 </div>
-<div class="section" id="first-simple-implementation">
-<h2>First simple implementation<a class="headerlink" href="#first-simple-implementation" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id1">
+<h2>最初の実装<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<p>以下の実装を見てみましょう。ising1d!という関数は、スピンあたりniters回のスピン更新を行います。
+関数は最初に呼び出したにコンパイルされます。
+実行速度を正しく計測するには、一回呼び出してからにしましょう。
+BenchmarkTools中の&#64;benchmarkを使えば、自動的に複数回呼び出して計測してくれます。</p>
+<div class="section" id="id2">
+<h3>演習問題<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
+<p>毎回指数関数の値を計算する場合、どの程度性能が悪化するか確認してみましょう。</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="k">function</span> <span class="n">ising1d!</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">β</span><span class="p">,</span> <span class="n">niters</span><span class="p">,</span> <span class="n">rng</span><span class="p">)</span>
@@ -294,8 +309,20 @@ We adopt <span class="math notranslate nohighlight">\(S_i=1\)</span> with a prob
 </div>
 </div>
 </div>
-<div class="section" id="more-complex-implementation-with-measurement">
-<h2>More complex implementation with measurement<a class="headerlink" href="#more-complex-implementation-with-measurement" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="id3">
+<h2>物理量計測込みの実装<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h2>
+<p>では、次に物理量（磁化、エネルギー)の計算を含めたプログラムを書いてみます。
+ここで重要な点は、磁化、エネルギーの値は、スピン状態の更新と同時に、差分で更新する点です。
+この更新は、(スピン更新と同じ)<span class="math notranslate nohighlight">\(O(1)\)</span>の計算量ですみますが、
+定義に従って最初から計算し直すと<span class="math notranslate nohighlight">\(O(N)\)</span>の計算量がかかってしまいます。</p>
+<p>以下のコードはmodule MCの中に囲っています。
+moduleの中に入れない場合、構造体structの再定義が許されないため、
+コードを書くときの試行錯誤の妨げになるからです。</p>
+<p>SpinStateはスピン状態を表すstructで、磁化、エネルギーの値も同時に保存しています。
+スピン状態やこれらの物理量が常にconsistentであることを保証して計算を進めます。</p>
+<p>エネルギー、磁化を計算する関数をそれぞれ定義し、SpinStateオブジェクトの生成、
+状態更新前後のconsistencyのチェックに利用しています。</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="c"># Wrap everything with a module to allow redefition of type</span>
@@ -439,7 +466,7 @@ and compare the results with the exact ones!
     
     <div class='prev-next-bottom'>
         
-    <a class='left-prev' id="prev-link" href="mc.html" title="previous page">Overview</a>
+    <a class='left-prev' id="prev-link" href="mc.html" title="previous page">概要</a>
 
     </div>
     <footer class="footer mt-5 mt-md-0">
