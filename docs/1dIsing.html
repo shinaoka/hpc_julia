@@ -268,9 +268,9 @@ BenchmarkTools中の&#64;benchmarkを使えば、自動的に複数回呼び出�
     <span class="k">end</span>
 <span class="k">end</span>
 
-<span class="n">n</span> <span class="o">=</span> <span class="mi">100</span>
+<span class="n">num_spins</span> <span class="o">=</span> <span class="mi">100</span>
 <span class="n">rng</span> <span class="o">=</span> <span class="kt">MersenneTwister</span><span class="p">(</span><span class="mi">4649</span><span class="p">)</span>
-<span class="n">s0</span> <span class="o">=</span> <span class="n">rand</span><span class="p">(</span><span class="n">rng</span><span class="p">,</span> <span class="kt">Int8</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">n</span><span class="p">)</span>
+<span class="n">s0</span> <span class="o">=</span> <span class="n">rand</span><span class="p">(</span><span class="n">rng</span><span class="p">,</span> <span class="kt">Int8</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">num_spins</span><span class="p">)</span>
 <span class="n">β</span> <span class="o">=</span> <span class="mf">100.0</span>
 <span class="n">niters</span> <span class="o">=</span> <span class="mi">10</span><span class="o">^</span><span class="mi">3</span>
 
@@ -285,19 +285,22 @@ BenchmarkTools中の&#64;benchmarkを使えば、自動的に複数回呼び出�
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  0.000536 seconds (1 allocation: 128 bytes)
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  0.000428 seconds (
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>1 allocation: 128 bytes)
 </pre></div>
 </div>
 <div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>BenchmarkTools.Trial: 
   memory estimate:  128 bytes
   allocs estimate:  1
   --------------
-  minimum time:     423.620 μs (0.00% GC)
-  median time:      445.689 μs (0.00% GC)
-  mean time:        501.821 μs (0.00% GC)
-  maximum time:     1.450 ms (0.00% GC)
+  minimum time:     433.216 μs (0.00% GC)
+  median time:      444.626 μs (0.00% GC)
+  mean time:        507.441 μs (0.00% GC)
+  maximum time:     1.453 ms (0.00% GC)
   --------------
-  samples:          9955
+  samples:          9846
   evals/sample:     1
 </pre></div>
 </div>
@@ -413,12 +416,12 @@ moduleの中に入れない場合、構造体structの再定義が許されな�
   memory estimate:  128 bytes
   allocs estimate:  1
   --------------
-  minimum time:     462.207 μs (0.00% GC)
-  median time:      565.551 μs (0.00% GC)
-  mean time:        565.358 μs (0.00% GC)
-  maximum time:     2.613 ms (0.00% GC)
+  minimum time:     444.184 μs (0.00% GC)
+  median time:      466.338 μs (0.00% GC)
+  mean time:        508.461 μs (0.00% GC)
+  maximum time:     1.545 ms (0.00% GC)
   --------------
-  samples:          8840
+  samples:          9830
   evals/sample:     1
 </pre></div>
 </div>
@@ -426,18 +429,21 @@ moduleの中に入れない場合、構造体structの再定義が許されな�
 </div>
 <p>では、実際に物理量を計測してみます。
 以下、<span class="math notranslate nohighlight">\(\langle O \rangle_\mathrm{MC}\)</span>は物理量<span class="math notranslate nohighlight">\(O\)</span>のモンテカルロ平均を表します。</p>
-<p>熱容量:
-$<span class="math notranslate nohighlight">\(
+<p>熱容量:</p>
+<div class="math notranslate nohighlight">
+\[
 C = \frac{\langle E^2\rangle_\mathrm{MC} - \langle E\rangle_\mathrm{MC}^2}{T^2}
-\)</span>$</p>
-<p>磁化の2乗 (磁化自体の期待値は対称性から0になる):
-$<span class="math notranslate nohighlight">\(
+\]</div>
+<p>磁化の2乗 (磁化自体の期待値は対称性から0になる):</p>
+<div class="math notranslate nohighlight">
+\[
 M_2 = \langle M^2\rangle_\mathrm{MC}
-\)</span>$</p>
-<p>帯磁率:
-$<span class="math notranslate nohighlight">\(
+\]</div>
+<p>帯磁率:</p>
+<div class="math notranslate nohighlight">
+\[
 \chi = \frac{\langle M^2\rangle_\mathrm{MC}}{T}
-\)</span>$</p>
+\]</div>
 <p>前準備として、複数の物理量の計測結果を簡単に格納する”Accumulator”を作っておきましょう。</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
@@ -492,24 +498,32 @@ $<span class="math notranslate nohighlight">\(
 </div>
 </div>
 </div>
+<p>では、実際に物理量を計算してみましょう。
+niters_measモンテカルロステップ毎に、計測を実行します（1モンテカルロステップ＝全てのスピンを一回ずつ更新を試みる)。
+また、平衡状態に達してから計測したいので、最初のntherm回の計測はスキップします。</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="n">nsweeps</span> <span class="o">=</span> <span class="mi">100</span>
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="k">function</span> <span class="n">solve!</span><span class="p">(</span><span class="n">ss</span><span class="p">,</span> <span class="n">acc</span><span class="p">,</span> <span class="n">β</span><span class="p">,</span> <span class="n">nsweeps</span><span class="p">,</span> <span class="n">ntherm</span><span class="p">,</span> <span class="n">niters_meas</span><span class="p">,</span> <span class="n">rng</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">isweep</span> <span class="kp">in</span> <span class="mi">1</span><span class="o">:</span><span class="n">nsweeps</span>
+        <span class="n">MC</span><span class="o">.</span><span class="n">update!</span><span class="p">(</span><span class="n">ss</span><span class="p">,</span> <span class="n">β</span><span class="p">,</span> <span class="n">niters_meas</span><span class="p">,</span> <span class="n">rng</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">isweep</span> <span class="o">&lt;=</span> <span class="n">ntherm</span>
+            <span class="k">continue</span>
+        <span class="k">end</span>
+        <span class="n">Meas</span><span class="o">.</span><span class="n">add!</span><span class="p">(</span><span class="n">acc</span><span class="p">,</span> <span class="s">&quot;E&quot;</span><span class="p">,</span> <span class="kt">Float64</span><span class="p">(</span><span class="n">ss</span><span class="o">.</span><span class="n">energy</span><span class="p">))</span>
+        <span class="n">Meas</span><span class="o">.</span><span class="n">add!</span><span class="p">(</span><span class="n">acc</span><span class="p">,</span> <span class="s">&quot;E2&quot;</span><span class="p">,</span> <span class="kt">Float64</span><span class="p">(</span><span class="n">ss</span><span class="o">.</span><span class="n">energy</span><span class="p">)</span><span class="o">^</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">MC</span><span class="o">.</span><span class="n">sanity_check</span><span class="p">(</span><span class="n">ss</span><span class="p">)</span>
+    <span class="k">end</span>
+<span class="k">end</span>
+
+
+<span class="n">nsweeps</span> <span class="o">=</span> <span class="mi">100</span>
 <span class="n">niters_meas</span> <span class="o">=</span> <span class="mi">10</span>
 <span class="n">ntherm</span> <span class="o">=</span> <span class="n">ceil</span><span class="p">(</span><span class="n">nsweeps</span><span class="o">/</span><span class="mi">10</span><span class="p">)</span>
-<span class="n">ss</span> <span class="o">=</span> <span class="n">MC</span><span class="o">.</span><span class="n">SpinState</span><span class="p">(</span><span class="n">s0</span><span class="p">)</span>
 <span class="n">β</span> <span class="o">=</span> <span class="mf">1.0</span>
 
+<span class="n">ss</span> <span class="o">=</span> <span class="n">MC</span><span class="o">.</span><span class="n">SpinState</span><span class="p">(</span><span class="n">s0</span><span class="p">)</span>
 <span class="n">acc</span> <span class="o">=</span> <span class="n">Meas</span><span class="o">.</span><span class="n">Accumulator</span><span class="p">()</span>
-<span class="k">for</span> <span class="n">isweep</span> <span class="kp">in</span> <span class="mi">1</span><span class="o">:</span><span class="n">nsweeps</span>
-    <span class="n">MC</span><span class="o">.</span><span class="n">update!</span><span class="p">(</span><span class="n">ss</span><span class="p">,</span> <span class="n">β</span><span class="p">,</span> <span class="n">niters_meas</span><span class="p">,</span> <span class="n">rng</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">isweep</span> <span class="o">&lt;=</span> <span class="n">ntherm</span>
-        <span class="k">continue</span>
-    <span class="k">end</span>
-    <span class="n">Meas</span><span class="o">.</span><span class="n">add!</span><span class="p">(</span><span class="n">acc</span><span class="p">,</span> <span class="s">&quot;E&quot;</span><span class="p">,</span> <span class="kt">Float64</span><span class="p">(</span><span class="n">ss</span><span class="o">.</span><span class="n">energy</span><span class="p">))</span>
-    <span class="n">Meas</span><span class="o">.</span><span class="n">add!</span><span class="p">(</span><span class="n">acc</span><span class="p">,</span> <span class="s">&quot;E2&quot;</span><span class="p">,</span> <span class="kt">Float64</span><span class="p">(</span><span class="n">ss</span><span class="o">.</span><span class="n">energy</span><span class="p">)</span><span class="o">^</span><span class="mi">2</span><span class="p">)</span>
-<span class="k">end</span>
-<span class="n">MC</span><span class="o">.</span><span class="n">sanity_check</span><span class="p">(</span><span class="n">ss</span><span class="p">)</span>
+<span class="n">solve!</span><span class="p">(</span><span class="n">ss</span><span class="p">,</span> <span class="n">acc</span><span class="p">,</span> <span class="n">β</span><span class="p">,</span> <span class="n">nsweeps</span><span class="p">,</span> <span class="n">ntherm</span><span class="p">,</span> <span class="n">niters_meas</span><span class="p">,</span> <span class="n">rng</span><span class="p">)</span>
 
 <span class="n">println</span><span class="p">(</span><span class="n">Meas</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">acc</span><span class="p">,</span> <span class="s">&quot;E&quot;</span><span class="p">))</span>
 <span class="n">println</span><span class="p">(</span><span class="n">Meas</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">acc</span><span class="p">,</span> <span class="s">&quot;E2&quot;</span><span class="p">))</span>
@@ -518,7 +532,53 @@ $<span class="math notranslate nohighlight">\(
 </div>
 <div class="cell_output docutils container">
 <div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>-76.71111111111111
-5922.133333333333
+5923.555555555556
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="k">using</span> <span class="n">PyPlot</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="n">exact_C</span><span class="p">(</span><span class="n">T</span><span class="p">)</span> <span class="o">=</span> <span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="n">T</span> <span class="o">*</span> <span class="n">cosh</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="n">T</span><span class="p">))</span><span class="o">^</span><span class="mi">2</span>
+
+<span class="n">nsweeps</span> <span class="o">=</span> <span class="mi">10</span><span class="o">^</span><span class="mi">4</span>
+<span class="n">num_spins</span> <span class="o">=</span> <span class="mi">1000</span>
+
+<span class="n">rng</span> <span class="o">=</span> <span class="kt">MersenneTwister</span><span class="p">(</span><span class="mi">4649</span><span class="p">)</span>
+<span class="n">s0</span> <span class="o">=</span> <span class="n">rand</span><span class="p">(</span><span class="n">rng</span><span class="p">,</span> <span class="kt">Int8</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">num_spins</span><span class="p">)</span>
+
+<span class="n">Ts</span> <span class="o">=</span> <span class="n">range</span><span class="p">(</span><span class="mf">0.3</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+<span class="n">Ts_mc</span> <span class="o">=</span> <span class="n">range</span><span class="p">(</span><span class="mf">0.3</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+
+<span class="n">C_mc</span> <span class="o">=</span> <span class="kt">Float64</span><span class="p">[]</span>
+<span class="k">for</span> <span class="n">T</span> <span class="kp">in</span> <span class="n">Ts_mc</span>
+    <span class="n">ss</span> <span class="o">=</span> <span class="n">MC</span><span class="o">.</span><span class="n">SpinState</span><span class="p">(</span><span class="n">s0</span><span class="p">)</span>
+    <span class="n">acc</span> <span class="o">=</span> <span class="n">Meas</span><span class="o">.</span><span class="n">Accumulator</span><span class="p">()</span>
+    <span class="n">solve!</span><span class="p">(</span><span class="n">ss</span><span class="p">,</span> <span class="n">acc</span><span class="p">,</span> <span class="mi">1</span><span class="o">/</span><span class="n">T</span><span class="p">,</span> <span class="n">nsweeps</span><span class="p">,</span> <span class="n">ntherm</span><span class="p">,</span> <span class="n">niters_meas</span><span class="p">,</span> <span class="n">rng</span><span class="p">)</span>
+    <span class="n">E</span> <span class="o">=</span> <span class="n">Meas</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">acc</span><span class="p">,</span> <span class="s">&quot;E&quot;</span><span class="p">)</span>
+    <span class="n">E2</span> <span class="o">=</span> <span class="n">Meas</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">acc</span><span class="p">,</span> <span class="s">&quot;E2&quot;</span><span class="p">)</span>
+    <span class="n">push!</span><span class="p">(</span><span class="n">C_mc</span><span class="p">,</span> <span class="p">(</span><span class="n">E2</span><span class="o">-</span><span class="n">E</span><span class="o">^</span><span class="mi">2</span><span class="p">)</span><span class="o">/</span><span class="n">T</span><span class="o">^</span><span class="mi">2</span><span class="p">)</span>
+<span class="k">end</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">Ts</span><span class="p">,</span> <span class="n">exact_C</span><span class="o">.</span><span class="p">(</span><span class="n">Ts</span><span class="p">),</span> <span class="n">label</span><span class="o">=</span><span class="s">&quot;Exact&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">Ts_mc</span><span class="p">,</span> <span class="n">C_mc</span> <span class="o">./</span> <span class="n">num_spins</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s">&quot;MC&quot;</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="s">&quot;o&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="n">raw</span><span class="s">&quot;</span><span class="si">$T</span><span class="s">$&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="n">raw</span><span class="s">&quot;</span><span class="si">$C</span><span class="s">/N$&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="nb">nothing</span><span class="p">])</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/1dIsing_15_0.png" src="../_images/1dIsing_15_0.png" />
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>PyObject &lt;matplotlib.legend.Legend object at 0x1493a8550&gt;
 </pre></div>
 </div>
 </div>
