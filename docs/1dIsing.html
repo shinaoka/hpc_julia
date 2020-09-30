@@ -206,11 +206,6 @@
    物理量計測込みの実装
   </a>
  </li>
- <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#exercise">
-   Exercise
-  </a>
- </li>
 </ul>
 
         </nav>
@@ -250,7 +245,7 @@
 <div class="section" id="id1">
 <h2>最初の実装<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
 <p>以下の実装を見てみましょう。ising1d!という関数は、スピンあたりniters回のスピン更新を行います。
-関数は最初に呼び出したにコンパイルされます。
+関数は最初に呼び出した時にコンパイルされます。
 実行速度を正しく計測するには、一回呼び出してからにしましょう。
 BenchmarkTools中の&#64;benchmarkを使えば、自動的に複数回呼び出して計測してくれます。</p>
 <div class="section" id="id2">
@@ -290,19 +285,19 @@ BenchmarkTools中の&#64;benchmarkを使えば、自動的に複数回呼び出�
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  0.000662 seconds (1 allocation: 128 bytes)
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  0.000533 seconds (1 allocation: 128 bytes)
 </pre></div>
 </div>
 <div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>BenchmarkTools.Trial: 
   memory estimate:  128 bytes
   allocs estimate:  1
   --------------
-  minimum time:     656.871 μs (0.00% GC)
-  median time:      659.256 μs (0.00% GC)
-  mean time:        664.074 μs (0.00% GC)
-  maximum time:     1.083 ms (0.00% GC)
+  minimum time:     433.233 μs (0.00% GC)
+  median time:      455.834 μs (0.00% GC)
+  mean time:        526.229 μs (0.00% GC)
+  maximum time:     1.519 ms (0.00% GC)
   --------------
-  samples:          7521
+  samples:          9492
   evals/sample:     1
 </pre></div>
 </div>
@@ -397,7 +392,7 @@ moduleの中に入れない場合、構造体structの再定義が許されな�
 </div>
 </div>
 </div>
-<p>OK, create an updater object and run it, and check if a spin state is updated correctly.</p>
+<p>では、実際にスピン更新を行って、その後consistencyが保たれているか見てみましょう。</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="n">ss</span> <span class="o">=</span> <span class="n">MC</span><span class="o">.</span><span class="n">SpinState</span><span class="p">(</span><span class="n">s0</span><span class="p">)</span>
@@ -418,23 +413,122 @@ moduleの中に入れない場合、構造体structの再定義が許されな�
   memory estimate:  128 bytes
   allocs estimate:  1
   --------------
-  minimum time:     712.874 μs (0.00% GC)
-  median time:      719.099 μs (0.00% GC)
-  mean time:        731.856 μs (0.00% GC)
-  maximum time:     3.983 ms (0.00% GC)
+  minimum time:     473.917 μs (0.00% GC)
+  median time:      499.894 μs (0.00% GC)
+  mean time:        572.979 μs (0.00% GC)
+  maximum time:     1.495 ms (0.00% GC)
   --------------
-  samples:          6828
+  samples:          8722
   evals/sample:     1
 </pre></div>
 </div>
 </div>
 </div>
+<p>では、実際に物理量を計測してみます。
+以下、<span class="math notranslate nohighlight">\(\langle O \rangle_\mathrm{MC}\)</span>は物理量<span class="math notranslate nohighlight">\(O\)</span>のモンテカルロ平均を表します。</p>
+<p>熱容量:
+$<span class="math notranslate nohighlight">\(
+C = \frac{\langle E^2\rangle_\mathrm{MC} - \langle E\rangle_\mathrm{MC}^2}{T^2}
+\)</span>$</p>
+<p>磁化の2乗 (磁化自体の期待値は対称性から0になる):
+$<span class="math notranslate nohighlight">\(
+M_2 = \langle M^2\rangle_\mathrm{MC}
+\)</span>$</p>
+<p>帯磁率:
+$<span class="math notranslate nohighlight">\(
+\chi = \frac{\langle M^2\rangle_\mathrm{MC}}{T}
+\)</span>$</p>
+<p>前準備として、複数の物理量の計測結果を簡単に格納する”Accumulator”を作っておきましょう。</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="k">module</span> <span class="n">Meas</span>
+
+<span class="k">struct</span> <span class="n">Accumulator</span>
+    <span class="n">count</span><span class="o">::</span><span class="kt">Dict</span><span class="p">{</span><span class="n">String</span><span class="p">,</span><span class="kt">UInt64</span><span class="p">}</span>
+    <span class="n">data</span><span class="o">::</span><span class="kt">Dict</span><span class="p">{</span><span class="n">String</span><span class="p">,</span><span class="kt">Any</span><span class="p">}</span>
+<span class="k">end</span>
+
+<span class="s">&quot;&quot;&quot;</span>
+<span class="s">Constructor</span>
+<span class="s">&quot;&quot;&quot;</span>
+<span class="k">function</span> <span class="n">Accumulator</span><span class="p">()</span>
+    <span class="n">Accumulator</span><span class="p">(</span><span class="kt">Dict</span><span class="p">{</span><span class="n">String</span><span class="p">,</span><span class="kt">UInt64</span><span class="p">}(),</span> <span class="kt">Dict</span><span class="p">{</span><span class="n">String</span><span class="p">,</span><span class="kt">Any</span><span class="p">}())</span>
+<span class="k">end</span>
+
+<span class="s">&quot;&quot;&quot;</span>
+<span class="s">Add a sample</span>
+<span class="s">&quot;&quot;&quot;</span>
+<span class="k">function</span> <span class="n">add!</span><span class="p">(</span><span class="n">acc</span><span class="o">::</span><span class="n">Accumulator</span><span class="p">,</span> <span class="n">name</span><span class="o">::</span><span class="n">String</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+    <span class="k">if</span> <span class="o">!</span><span class="n">haskey</span><span class="p">(</span><span class="n">acc</span><span class="o">.</span><span class="n">count</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+        <span class="n">acc</span><span class="o">.</span><span class="n">count</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">acc</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">copy</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+    <span class="k">else</span>
+        <span class="n">acc</span><span class="o">.</span><span class="n">count</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">acc</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">+=</span> <span class="n">data</span>
+    <span class="k">end</span>
+<span class="k">end</span>
+
+<span class="s">&quot;&quot;&quot;</span>
+<span class="s">Compuate mean</span>
+<span class="s">&quot;&quot;&quot;</span>
+<span class="k">function</span> <span class="n">mean</span><span class="p">(</span><span class="n">acc</span><span class="o">::</span><span class="n">Accumulator</span><span class="p">,</span> <span class="n">name</span><span class="o">::</span><span class="n">String</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">acc</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">/</span><span class="n">acc</span><span class="o">.</span><span class="n">count</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+<span class="k">end</span>
+
+<span class="k">end</span>
+
+
+<span class="c"># Perform some tests</span>
+<span class="k">let</span>
+    <span class="n">acc</span> <span class="o">=</span> <span class="n">Meas</span><span class="o">.</span><span class="n">Accumulator</span><span class="p">()</span>
+    <span class="n">Meas</span><span class="o">.</span><span class="n">add!</span><span class="p">(</span><span class="n">acc</span><span class="p">,</span> <span class="s">&quot;obs1&quot;</span><span class="p">,</span> <span class="n">ones</span><span class="p">(</span><span class="mi">4</span><span class="p">))</span>
+    <span class="n">Meas</span><span class="o">.</span><span class="n">add!</span><span class="p">(</span><span class="n">acc</span><span class="p">,</span> <span class="s">&quot;obs1&quot;</span><span class="p">,</span> <span class="mi">2</span> <span class="o">.*</span> <span class="n">ones</span><span class="p">(</span><span class="mi">4</span><span class="p">))</span>
+    <span class="n">Meas</span><span class="o">.</span><span class="n">add!</span><span class="p">(</span><span class="n">acc</span><span class="p">,</span> <span class="s">&quot;obs2&quot;</span><span class="p">,</span> <span class="n">ones</span><span class="p">(</span><span class="mi">4</span><span class="p">))</span>
+    <span class="n">Meas</span><span class="o">.</span><span class="n">add!</span><span class="p">(</span><span class="n">acc</span><span class="p">,</span> <span class="s">&quot;obs2&quot;</span><span class="p">,</span> <span class="n">ones</span><span class="p">(</span><span class="mi">4</span><span class="p">))</span>
+    <span class="nd">@assert</span> <span class="n">Meas</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">acc</span><span class="p">,</span> <span class="s">&quot;obs1&quot;</span><span class="p">)</span> <span class="n">≈</span> <span class="mf">1.5</span> <span class="o">.*</span> <span class="n">ones</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+    <span class="nd">@assert</span> <span class="n">Meas</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">acc</span><span class="p">,</span> <span class="s">&quot;obs2&quot;</span><span class="p">)</span> <span class="n">≈</span> <span class="n">ones</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+<span class="k">end</span>
+</pre></div>
 </div>
-<div class="section" id="exercise">
-<h2>Exercise<a class="headerlink" href="#exercise" title="Permalink to this headline">¶</a></h2>
-<p>Implement measurement of the magnetization and specific heat
-and compare the results with the exact ones!
-(To do) Include analytic expressions</p>
+</div>
+<div class="cell_output docutils container">
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>WARNING: replacing module Meas.
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="n">nsweeps</span> <span class="o">=</span> <span class="mi">100</span>
+<span class="n">niters_meas</span> <span class="o">=</span> <span class="mi">10</span>
+<span class="n">ntherm</span> <span class="o">=</span> <span class="n">ceil</span><span class="p">(</span><span class="n">nsweeps</span><span class="o">/</span><span class="mi">10</span><span class="p">)</span>
+<span class="n">ss</span> <span class="o">=</span> <span class="n">MC</span><span class="o">.</span><span class="n">SpinState</span><span class="p">(</span><span class="n">s0</span><span class="p">)</span>
+<span class="n">β</span> <span class="o">=</span> <span class="mf">1.0</span>
+
+<span class="n">acc</span> <span class="o">=</span> <span class="n">Meas</span><span class="o">.</span><span class="n">Accumulator</span><span class="p">()</span>
+<span class="k">for</span> <span class="n">isweep</span> <span class="kp">in</span> <span class="mi">1</span><span class="o">:</span><span class="n">nsweeps</span>
+    <span class="n">MC</span><span class="o">.</span><span class="n">update!</span><span class="p">(</span><span class="n">ss</span><span class="p">,</span> <span class="n">β</span><span class="p">,</span> <span class="n">niters_meas</span><span class="p">,</span> <span class="n">rng</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">isweep</span> <span class="o">&lt;=</span> <span class="n">ntherm</span>
+        <span class="k">continue</span>
+    <span class="k">end</span>
+    <span class="n">Meas</span><span class="o">.</span><span class="n">add!</span><span class="p">(</span><span class="n">acc</span><span class="p">,</span> <span class="s">&quot;E&quot;</span><span class="p">,</span> <span class="n">ss</span><span class="o">.</span><span class="n">energy</span><span class="p">)</span>
+    <span class="n">Meas</span><span class="o">.</span><span class="n">add!</span><span class="p">(</span><span class="n">acc</span><span class="p">,</span> <span class="s">&quot;E2&quot;</span><span class="p">,</span> <span class="n">ss</span><span class="o">.</span><span class="n">energy</span><span class="o">^</span><span class="mi">2</span><span class="p">)</span>
+<span class="k">end</span>
+<span class="n">MC</span><span class="o">.</span><span class="n">sanity_check</span><span class="p">(</span><span class="n">ss</span><span class="p">)</span>
+
+<span class="n">println</span><span class="p">(</span><span class="n">Meas</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">acc</span><span class="p">,</span> <span class="s">&quot;E&quot;</span><span class="p">))</span>
+<span class="n">println</span><span class="p">(</span><span class="n">Meas</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">acc</span><span class="p">,</span> <span class="s">&quot;E2&quot;</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>-76.17777777777778
+5847.822222222222
+</pre></div>
+</div>
+</div>
+</div>
+<p>TODO: 厳密解との比較</p>
 </div>
 </div>
 
