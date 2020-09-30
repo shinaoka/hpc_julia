@@ -285,19 +285,19 @@ BenchmarkTools中の&#64;benchmarkを使えば、自動的に複数回呼び出�
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  0.000541 seconds (1 allocation: 128 bytes)
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  0.000536 seconds (1 allocation: 128 bytes)
 </pre></div>
 </div>
 <div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>BenchmarkTools.Trial: 
   memory estimate:  128 bytes
   allocs estimate:  1
   --------------
-  minimum time:     433.276 μs (0.00% GC)
-  median time:      450.016 μs (0.00% GC)
-  mean time:        515.188 μs (0.00% GC)
-  maximum time:     1.637 ms (0.00% GC)
+  minimum time:     423.620 μs (0.00% GC)
+  median time:      445.689 μs (0.00% GC)
+  mean time:        501.821 μs (0.00% GC)
+  maximum time:     1.450 ms (0.00% GC)
   --------------
-  samples:          9697
+  samples:          9955
   evals/sample:     1
 </pre></div>
 </div>
@@ -413,12 +413,12 @@ moduleの中に入れない場合、構造体structの再定義が許されな�
   memory estimate:  128 bytes
   allocs estimate:  1
   --------------
-  minimum time:     454.237 μs (0.00% GC)
-  median time:      488.305 μs (0.00% GC)
-  mean time:        536.335 μs (0.00% GC)
-  maximum time:     1.251 ms (0.00% GC)
+  minimum time:     462.207 μs (0.00% GC)
+  median time:      565.551 μs (0.00% GC)
+  mean time:        565.358 μs (0.00% GC)
+  maximum time:     2.613 ms (0.00% GC)
   --------------
-  samples:          9320
+  samples:          8840
   evals/sample:     1
 </pre></div>
 </div>
@@ -506,8 +506,8 @@ $<span class="math notranslate nohighlight">\(
     <span class="k">if</span> <span class="n">isweep</span> <span class="o">&lt;=</span> <span class="n">ntherm</span>
         <span class="k">continue</span>
     <span class="k">end</span>
-    <span class="n">Meas</span><span class="o">.</span><span class="n">add!</span><span class="p">(</span><span class="n">acc</span><span class="p">,</span> <span class="s">&quot;E&quot;</span><span class="p">,</span> <span class="n">ss</span><span class="o">.</span><span class="n">energy</span><span class="p">)</span>
-    <span class="n">Meas</span><span class="o">.</span><span class="n">add!</span><span class="p">(</span><span class="n">acc</span><span class="p">,</span> <span class="s">&quot;E2&quot;</span><span class="p">,</span> <span class="n">ss</span><span class="o">.</span><span class="n">energy</span><span class="o">^</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">Meas</span><span class="o">.</span><span class="n">add!</span><span class="p">(</span><span class="n">acc</span><span class="p">,</span> <span class="s">&quot;E&quot;</span><span class="p">,</span> <span class="kt">Float64</span><span class="p">(</span><span class="n">ss</span><span class="o">.</span><span class="n">energy</span><span class="p">))</span>
+    <span class="n">Meas</span><span class="o">.</span><span class="n">add!</span><span class="p">(</span><span class="n">acc</span><span class="p">,</span> <span class="s">&quot;E2&quot;</span><span class="p">,</span> <span class="kt">Float64</span><span class="p">(</span><span class="n">ss</span><span class="o">.</span><span class="n">energy</span><span class="p">)</span><span class="o">^</span><span class="mi">2</span><span class="p">)</span>
 <span class="k">end</span>
 <span class="n">MC</span><span class="o">.</span><span class="n">sanity_check</span><span class="p">(</span><span class="n">ss</span><span class="p">)</span>
 
@@ -517,8 +517,8 @@ $<span class="math notranslate nohighlight">\(
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>-76.35555555555555
-5885.155555555555
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>-76.71111111111111
+5922.133333333333
 </pre></div>
 </div>
 </div>
