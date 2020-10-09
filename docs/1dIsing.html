@@ -6,7 +6,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>1Dイジング模型 &#8212; HPC exercise in Julia</title>
+    <title>1D Ising model &#8212; HPC exercise in Julia</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/all.min.css" integrity="sha384-KA6wR/X5RY4zFAHpv/CnoG2UW1uogYfdnP67Uv7eULvTveboZJg0qUpmJZb5VqzN" crossorigin="anonymous">
     <link href="../_static/css/index.css" rel="stylesheet">
     <link rel="stylesheet" href="../_static/sphinx-book-theme.css" type="text/css" />
@@ -94,7 +94,7 @@
  </li>
  <li class="toctree-l1 current active">
   <a class="current reference internal" href="#">
-   1Dイジング模型
+   1D Ising model
   </a>
  </li>
 </ul>
@@ -190,25 +190,25 @@
         <nav id="bd-toc-nav">
             <ul class="nav section-nav flex-column">
  <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#id1">
-   最初の実装
+  <a class="reference internal nav-link" href="#first-simple-implementation">
+   First simple implementation
   </a>
   <ul class="nav section-nav flex-column">
    <li class="toc-h3 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#id2">
-     演習問題1
+    <a class="reference internal nav-link" href="#exercise-1">
+     Exercise 1
     </a>
    </li>
   </ul>
  </li>
  <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#id3">
-   物理量計測込みの実装
+  <a class="reference internal nav-link" href="#complete-implementation-with-measurement">
+   Complete implementation with measurement
   </a>
   <ul class="nav section-nav flex-column">
    <li class="toc-h3 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#id4">
-     演習問題2
+    <a class="reference internal nav-link" href="#exercise-2">
+     Exercise 2
     </a>
    </li>
   </ul>
@@ -223,19 +223,18 @@
         
               <div>
                 
-  <div class="section" id="d">
-<h1>1Dイジング模型<a class="headerlink" href="#d" title="Permalink to this headline">¶</a></h1>
-<p>ここでは次の1次元強磁性ハイゼンベルグ模型を考えます。</p>
-<div class="math notranslate nohighlight">
-\[
-\mathcal{H} = -\sum_i S_i S_{i+1}.
-\]</div>
-<p>前章の解説に従って、<span class="math notranslate nohighlight">\(i\)</span>番目のスピンを更新するとき、
-2つの状態間のエネルギー差は<span class="math notranslate nohighlight">\(\Delta E = E_\uparrow - E_\downarrow = - 2h\)</span>
-と計算出来ます。
-ここで、<span class="math notranslate nohighlight">\(h = S_{i-1} + S_{i+1}\)</span>は<span class="math notranslate nohighlight">\(i\)</span>番目のサイト以外のスピンが、<span class="math notranslate nohighlight">\(i\)</span>番目のスピンに及ぼす有効磁場です。
-最後に、<span class="math notranslate nohighlight">\(1/(1+\exp(\beta \Delta E ))\)</span>の確率で、<span class="math notranslate nohighlight">\(S_i=1\)</span>を採択します。</p>
-<p>なお、指数関数の計算は重いので（かけ算とかに比べ）、予め指数関数の値は計算して保存しておきます。</p>
+  <div class="section" id="d-ising-model">
+<h1>1D Ising model<a class="headerlink" href="#d-ising-model" title="Permalink to this headline">¶</a></h1>
+<p>Let us consider the 1D Ising model defined by the Hamiltonian
+$<span class="math notranslate nohighlight">\(
+\mathcal{H} = -\sum_i S_i S_{i+1}
+\)</span>$
+with periodic boundary conditions.</p>
+<p>When we update the <span class="math notranslate nohighlight">\(i\)</span>-the spin (using the procedure described in the previous section),
+the energy difference of the two states can be computed as <span class="math notranslate nohighlight">\(\Delta E = E_\uparrow - E_\downarrow = - 2h\)</span> with <span class="math notranslate nohighlight">\(O(1)\)</span> operations.
+Here, <span class="math notranslate nohighlight">\(h = S_{i-1} + S_{i+1}\)</span> is the effective magnetic field acting on the <span class="math notranslate nohighlight">\(i\)</span>-th spin from the other spins (i.e., the nearest-neighbor spins).
+Then, we take the state of <span class="math notranslate nohighlight">\(S_i=1\)</span> with a probability of <span class="math notranslate nohighlight">\(1/(1+\exp(\beta \Delta E ))=1/(1+\exp(-2h\beta))\)</span>.</p>
+<p>The values of the exponential function are precomputed and stored in memory to avoid expensive reevaluation.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="nd">@show</span> <span class="nb">VERSION</span>
@@ -249,15 +248,14 @@
 </div>
 </div>
 </div>
-<div class="section" id="id1">
-<h2>最初の実装<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
-<p>以下の実装を見てみましょう。ising1d!という関数は、スピンあたりniters回のスピン更新を行います。
-関数は最初に呼び出した時にコンパイルされます。
-実行速度を正しく計測するには、一回呼び出してからにしましょう。
-BenchmarkTools中の&#64;benchmarkを使えば、自動的に複数回呼び出して計測してくれます。</p>
-<div class="section" id="id2">
-<h3>演習問題1<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
-<p>毎回指数関数の値を計算する場合、どの程度性能が悪化するか確認してみましょう。</p>
+<div class="section" id="first-simple-implementation">
+<h2>First simple implementation<a class="headerlink" href="#first-simple-implementation" title="Permalink to this headline">¶</a></h2>
+<p>Let us look at the implementation shown below.
+The function ising1d! attempts to update each spin niters times.
+This function will be compiled when it’s called for the first time.
+Thus, you must call it once before measuring its timings.
+Or, you can simply use the macro &#64;benchmark in BenchmarkTools,
+which calles the function multiple times automatically.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="k">function</span> <span class="n">ising1d!</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">β</span><span class="p">,</span> <span class="n">niters</span><span class="p">,</span> <span class="n">rng</span><span class="p">)</span>
@@ -265,20 +263,21 @@ BenchmarkTools中の&#64;benchmarkを使えば、自動的に複数回呼び出�
     <span class="n">min_h</span> <span class="o">=</span> <span class="o">-</span><span class="mi">2</span>
     <span class="n">max_h</span> <span class="o">=</span> <span class="mi">2</span>
     <span class="n">prob</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="mi">1</span><span class="o">+</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="o">*</span><span class="n">β</span><span class="o">*</span><span class="n">h</span><span class="p">))</span> <span class="k">for</span> <span class="n">h</span> <span class="kp">in</span> <span class="n">min_h</span><span class="o">:</span><span class="n">max_h</span><span class="p">]</span>
+    <span class="c">#prob_f(h) = 1/(1+exp(-2*β*h))</span>
     <span class="k">for</span> <span class="n">iter</span> <span class="kp">in</span> <span class="mi">1</span><span class="o">:</span><span class="n">niters</span><span class="p">,</span> <span class="n">i</span> <span class="kp">in</span> <span class="mi">1</span><span class="o">:</span><span class="n">n</span>
         <span class="n">sl</span> <span class="o">=</span> <span class="n">s</span><span class="p">[</span><span class="n">ifelse</span><span class="p">(</span><span class="n">i</span> <span class="o">==</span> <span class="mi">1</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">)]</span>
         <span class="n">sr</span> <span class="o">=</span> <span class="n">s</span><span class="p">[</span><span class="n">ifelse</span><span class="p">(</span><span class="n">i</span> <span class="o">==</span> <span class="n">n</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)]</span>
         <span class="c"># h = -2, 0, 2</span>
         <span class="n">h</span> <span class="o">=</span> <span class="n">sl</span> <span class="o">+</span> <span class="n">sr</span>
-        <span class="n">si_old</span> <span class="o">=</span> <span class="n">s</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
         <span class="n">s</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">ifelse</span><span class="p">(</span><span class="n">rand</span><span class="p">(</span><span class="n">rng</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">prob</span><span class="p">[</span><span class="n">h</span><span class="o">-</span><span class="n">min_h</span><span class="o">+</span><span class="mi">1</span><span class="p">],</span> <span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="c">#s[i] = ifelse(rand(rng) &lt; prob_f(h), +1, -1)</span>
     <span class="k">end</span>
 <span class="k">end</span>
 
 <span class="n">num_spins</span> <span class="o">=</span> <span class="mi">100</span>
 <span class="n">rng</span> <span class="o">=</span> <span class="kt">MersenneTwister</span><span class="p">(</span><span class="mi">4649</span><span class="p">)</span>
 <span class="n">s0</span> <span class="o">=</span> <span class="n">rand</span><span class="p">(</span><span class="n">rng</span><span class="p">,</span> <span class="kt">Int8</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">num_spins</span><span class="p">)</span>
-<span class="n">β</span> <span class="o">=</span> <span class="mf">100.0</span>
+<span class="n">β</span> <span class="o">=</span> <span class="mf">10.0</span>
 <span class="n">niters</span> <span class="o">=</span> <span class="mi">10</span><span class="o">^</span><span class="mi">3</span>
 
 <span class="n">s</span> <span class="o">=</span> <span class="n">copy</span><span class="p">(</span><span class="n">s0</span><span class="p">)</span>
@@ -292,39 +291,43 @@ BenchmarkTools中の&#64;benchmarkを使えば、自動的に複数回呼び出�
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  0.000700 seconds (1 allocation: 128 bytes)
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  0.000535 seconds (1 allocation: 128 bytes)
 </pre></div>
 </div>
 <div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>BenchmarkTools.Trial: 
   memory estimate:  128 bytes
   allocs estimate:  1
   --------------
-  minimum time:     414.416 μs (0.00% GC)
-  median time:      425.048 μs (0.00% GC)
-  mean time:        451.282 μs (0.00% GC)
-  maximum time:     1.219 ms (0.00% GC)
+  minimum time:     442.967 μs (0.00% GC)
+  median time:      481.524 μs (0.00% GC)
+  mean time:        523.007 μs (0.00% GC)
+  maximum time:     1.680 ms (0.00% GC)
   --------------
-  samples:          10000
+  samples:          9550
   evals/sample:     1
 </pre></div>
 </div>
 </div>
 </div>
+<div class="section" id="exercise-1">
+<h3>Exercise 1<a class="headerlink" href="#exercise-1" title="Permalink to this headline">¶</a></h3>
+<p>Check how the performance is affected without precomuting the exponential function.</p>
 </div>
 </div>
-<div class="section" id="id3">
-<h2>物理量計測込みの実装<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h2>
-<p>では、次に物理量（磁化、エネルギー)の計算を含めたプログラムを書いてみます。
-ここで重要な点は、磁化、エネルギーの値は、スピン状態の更新と同時に、差分で更新する点です。
-この更新は、(スピン更新と同じ)<span class="math notranslate nohighlight">\(O(1)\)</span>の計算量ですみますが、
-定義に従って最初から計算し直すと<span class="math notranslate nohighlight">\(O(N)\)</span>の計算量がかかってしまいます。</p>
-<p>以下のコードはmodule MCの中に囲っています。
-moduleの中に入れない場合、構造体structの再定義が許されないため、
-コードを書くときの試行錯誤の妨げになるからです。</p>
-<p>SpinStateはスピン状態を表すstructで、磁化、エネルギーの値も同時に保存しています。
-スピン状態やこれらの物理量が常にconsistentであることを保証して計算を進めます。</p>
-<p>エネルギー、磁化を計算する関数をそれぞれ定義し、SpinStateオブジェクトの生成、
-状態更新前後のconsistencyのチェックに利用しています。</p>
+<div class="section" id="complete-implementation-with-measurement">
+<h2>Complete implementation with measurement<a class="headerlink" href="#complete-implementation-with-measurement" title="Permalink to this headline">¶</a></h2>
+<p>Next, let us implement the measurement of observables such as magnetization and energy.
+The magnetization and energy can be updated simultanously with the update of the spin configuration,
+which costs only <span class="math notranslate nohighlight">\(O(1)\)</span> operations.
+If you compute the magnetization or energy from scratch,
+it would cost <span class="math notranslate nohighlight">\(O(N)\)</span> operations.</p>
+<p>SpinState is a struct for storing a spin state and the values of associcated observables.
+The data stored in a SpinState must be consistent throughout a Monte Carlo simulation.
+It’s not allowed to redefine a struct in the top-level scope.
+Thus, the definition of the struc SpinState is wrapped in a module, to allow the redefinition of a struc.
+This is convenient for doing trial and error.</p>
+<p>We also define functions for computing the energy and magnetization,
+which are used in many places.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="c"># Wrap everything with a module to allow redefition of type</span>
@@ -398,8 +401,13 @@ moduleの中に入れない場合、構造体structの再定義が許されな�
 </pre></div>
 </div>
 </div>
+<div class="cell_output docutils container">
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>WARNING: replacing module MC.
+</pre></div>
 </div>
-<p>では、実際にスピン更新を行って、その後consistencyが保たれているか見てみましょう。</p>
+</div>
+</div>
+<p>Let us perform a series of updates and check the consistency of the SpinState object.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="n">ss</span> <span class="o">=</span> <span class="n">MC</span><span class="o">.</span><span class="n">SpinState</span><span class="p">(</span><span class="n">s0</span><span class="p">)</span>
@@ -420,35 +428,35 @@ moduleの中に入れない場合、構造体structの再定義が許されな�
   memory estimate:  128 bytes
   allocs estimate:  1
   --------------
-  minimum time:     442.287 μs (0.00% GC)
-  median time:      485.028 μs (0.00% GC)
-  mean time:        508.228 μs (0.00% GC)
-  maximum time:     1.287 ms (0.00% GC)
+  minimum time:     453.714 μs (0.00% GC)
+  median time:      467.577 μs (0.00% GC)
+  mean time:        516.906 μs (0.00% GC)
+  maximum time:     1.222 ms (0.00% GC)
   --------------
-  samples:          9835
+  samples:          9668
   evals/sample:     1
 </pre></div>
 </div>
 </div>
 </div>
-<p>では、実際に物理量を計測してみます。
-以下、<span class="math notranslate nohighlight">\(\langle O \rangle_\mathrm{MC}\)</span>は物理量<span class="math notranslate nohighlight">\(O\)</span>のモンテカルロ平均を表します。</p>
-<p>熱容量:</p>
+<p>We now measure these observables during a Monte Carlo simulation.
+Hereafter, <span class="math notranslate nohighlight">\(\langle O \rangle_\mathrm{MC}\)</span> denotes a Monte Carlo average of an observable <span class="math notranslate nohighlight">\(O\)</span>.</p>
+<p>Heat capacity/specific heat:</p>
 <div class="math notranslate nohighlight">
 \[
 C = \frac{\langle E^2\rangle_\mathrm{MC} - \langle E\rangle_\mathrm{MC}^2}{T^2}
 \]</div>
-<p>磁化の2乗 (磁化自体の期待値は対称性から0になる):</p>
+<p>Squared magnetization (<span class="math notranslate nohighlight">\(\langle M\rangle_\mathrm{MC} = 0\)</span> due to symmetries):</p>
 <div class="math notranslate nohighlight">
 \[
 M_2 = \langle M^2\rangle_\mathrm{MC}
 \]</div>
-<p>帯磁率:</p>
+<p>Magnetic susceptibility:</p>
 <div class="math notranslate nohighlight">
 \[
 \chi = \frac{\langle M^2\rangle_\mathrm{MC}}{T}
 \]</div>
-<p>前準備として、複数の物理量の計測結果を簡単に格納する”Accumulator”を作っておきましょう。</p>
+<p>As a prelude, we will create an “Accumulator” to easily store the results of multiple measurements of physical quantities.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="k">module</span> <span class="n">Meas</span>
@@ -501,10 +509,15 @@ M_2 = \langle M^2\rangle_\mathrm{MC}
 </pre></div>
 </div>
 </div>
+<div class="cell_output docutils container">
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>WARNING: replacing module Meas.
+</pre></div>
 </div>
-<p>では、実際に物理量を計算してみましょう。
-niters_measモンテカルロステップ毎に、計測を実行します（1モンテカルロステップ＝全てのスピンを一回ずつ更新を試みる)。
-また、平衡状態に達してから計測したいので、最初のntherm回の計測はスキップします。</p>
+</div>
+</div>
+<p>We measure every niters_meas Monte Carlo steps.
+Every spin is attemped to be updated once in a signle Monte Carlo step.
+We skip the first ntherm measurements.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="k">function</span> <span class="n">solve!</span><span class="p">(</span><span class="n">ss</span><span class="p">,</span> <span class="n">acc</span><span class="p">,</span> <span class="n">β</span><span class="p">,</span> <span class="n">nsweeps</span><span class="p">,</span> <span class="n">ntherm</span><span class="p">,</span> <span class="n">niters_meas</span><span class="p">,</span> <span class="n">rng</span><span class="p">)</span>
@@ -535,13 +548,13 @@ niters_measモンテカルロステップ毎に、計測を実行します（1�
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>-76.4
-5881.777777777777
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>-76.13333333333334
+5829.866666666667
 </pre></div>
 </div>
 </div>
 </div>
-<p>では、温度を変えつつ、熱容量/比熱を計算してみます。</p>
+<p>We measure the specific heat with varying the temperature.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="n">nsweeps</span> <span class="o">=</span> <span class="mi">10</span><span class="o">^</span><span class="mi">6</span>
@@ -565,7 +578,7 @@ niters_measモンテカルロステップ毎に、計測を実行します（1�
 </div>
 </div>
 </div>
-<p>厳密解<span class="math notranslate nohighlight">\(C/N = \frac{1}{T^2 \cosh^2(1/T)}\)</span>と比較してみましょう。</p>
+<p>Let us compare Monte Carlo results with the exact solution <span class="math notranslate nohighlight">\(C/N = \frac{1}{T^2 \cosh^2(1/T)}\)</span>.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="k">using</span> <span class="n">PyPlot</span>
@@ -578,19 +591,17 @@ niters_measモンテカルロステップ毎に、計測を実行します（1�
 <span class="n">plt</span><span class="o">.</span><span class="n">xlim</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="nb">nothing</span><span class="p">])</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="nb">nothing</span><span class="p">])</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+<span class="p">;</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/1dIsing_17_0.png" src="../_images/1dIsing_17_0.png" />
-<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>PyObject &lt;matplotlib.legend.Legend object at 0x148f8ec70&gt;
-</pre></div>
+<img alt="../_images/1dIsing_18_0.png" src="../_images/1dIsing_18_0.png" />
 </div>
 </div>
-</div>
-<div class="section" id="id4">
-<h3>演習問題2<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h3>
-<p>帯磁率の計算を実装し、厳密解と比較しましょう。</p>
+<div class="section" id="exercise-2">
+<h3>Exercise 2<a class="headerlink" href="#exercise-2" title="Permalink to this headline">¶</a></h3>
+<p>Measure the magnetic susceptibility and compare the results with the exact solution.</p>
 </div>
 </div>
 </div>
