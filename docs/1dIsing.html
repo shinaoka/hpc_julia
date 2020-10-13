@@ -214,8 +214,8 @@
   </ul>
  </li>
  <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#make-type-safe-accumulator">
-   Make type-safe Accumulator
+  <a class="reference internal nav-link" href="#type-stability-of-accumulator">
+   Type stability of Accumulator
   </a>
  </li>
 </ul>
@@ -611,8 +611,8 @@ We skip the first ntherm measurements.</p>
 <p>Measure the magnetic susceptibility and compare the results with the exact solution.</p>
 </div>
 </div>
-<div class="section" id="make-type-safe-accumulator">
-<h2>Make type-safe Accumulator<a class="headerlink" href="#make-type-safe-accumulator" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="type-stability-of-accumulator">
+<h2>Type stability of Accumulator<a class="headerlink" href="#type-stability-of-accumulator" title="Permalink to this headline">¶</a></h2>
 <p>Type safe is an important concept to achieve high performance with Julia (see <a class="reference external" href="https://docs.julialang.org/en/v1/manual/performance-tips/">officitial document</a>).
 Actually, the Accumulator class implemented above is NOT type safe.
 Let us see how crtitical it is and how to improve on it.
