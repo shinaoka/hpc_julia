@@ -213,6 +213,11 @@
    </li>
   </ul>
  </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#make-type-safe-accumulator">
+   Make type-safe Accumulator
+  </a>
+ </li>
 </ul>
 
         </nav>
@@ -225,11 +230,12 @@
                 
   <div class="section" id="d-ising-model">
 <h1>1D Ising model<a class="headerlink" href="#d-ising-model" title="Permalink to this headline">¶</a></h1>
-<p>Let us consider the 1D Ising model defined by the Hamiltonian
-$<span class="math notranslate nohighlight">\(
+<p>Let us consider the 1D Ising model defined by the Hamiltonian</p>
+<div class="math notranslate nohighlight">
+\[
 \mathcal{H} = -\sum_i S_i S_{i+1}
-\)</span>$
-with periodic boundary conditions.</p>
+\]</div>
+<p>with periodic boundary conditions.</p>
 <p>When we update the <span class="math notranslate nohighlight">\(i\)</span>-the spin (using the procedure described in the previous section),
 the energy difference of the two states can be computed as <span class="math notranslate nohighlight">\(\Delta E = E_\uparrow - E_\downarrow = - 2h\)</span> with <span class="math notranslate nohighlight">\(O(1)\)</span> operations.
 Here, <span class="math notranslate nohighlight">\(h = S_{i-1} + S_{i+1}\)</span> is the effective magnetic field acting on the <span class="math notranslate nohighlight">\(i\)</span>-th spin from the other spins (i.e., the nearest-neighbor spins).
@@ -291,19 +297,19 @@ which calles the function multiple times automatically.</p>
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  0.000535 seconds (1 allocation: 128 bytes)
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  0.000534 seconds (1 allocation: 128 bytes)
 </pre></div>
 </div>
 <div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>BenchmarkTools.Trial: 
   memory estimate:  128 bytes
   allocs estimate:  1
   --------------
-  minimum time:     442.967 μs (0.00% GC)
-  median time:      481.524 μs (0.00% GC)
-  mean time:        523.007 μs (0.00% GC)
-  maximum time:     1.680 ms (0.00% GC)
+  minimum time:     406.253 μs (0.00% GC)
+  median time:      415.124 μs (0.00% GC)
+  mean time:        434.439 μs (0.00% GC)
+  maximum time:     1.292 ms (0.00% GC)
   --------------
-  samples:          9550
+  samples:          10000
   evals/sample:     1
 </pre></div>
 </div>
@@ -321,6 +327,12 @@ The magnetization and energy can be updated simultanously with the update of the
 which costs only <span class="math notranslate nohighlight">\(O(1)\)</span> operations.
 If you compute the magnetization or energy from scratch,
 it would cost <span class="math notranslate nohighlight">\(O(N)\)</span> operations.</p>
+<p>We explicity write the <span class="math notranslate nohighlight">\(S_i\)</span> dependence of the total energy as</p>
+<div class="math notranslate nohighlight">
+\[
+E(S_i) = - h S_i + E_0,
+\]</div>
+<p>where <span class="math notranslate nohighlight">\(h = S_{i-1} + S_{i+1}\)</span> and <span class="math notranslate nohighlight">\(E_0\)</span> is a constant that does not depend on <span class="math notranslate nohighlight">\(S_i\)</span>.</p>
 <p>SpinState is a struct for storing a spin state and the values of associcated observables.
 The data stored in a SpinState must be consistent throughout a Monte Carlo simulation.
 It’s not allowed to redefine a struct in the top-level scope.
@@ -401,11 +413,6 @@ which are used in many places.</p>
 </pre></div>
 </div>
 </div>
-<div class="cell_output docutils container">
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>WARNING: replacing module MC.
-</pre></div>
-</div>
-</div>
 </div>
 <p>Let us perform a series of updates and check the consistency of the SpinState object.</p>
 <div class="cell docutils container">
@@ -428,12 +435,12 @@ which are used in many places.</p>
   memory estimate:  128 bytes
   allocs estimate:  1
   --------------
-  minimum time:     453.714 μs (0.00% GC)
-  median time:      467.577 μs (0.00% GC)
-  mean time:        516.906 μs (0.00% GC)
-  maximum time:     1.222 ms (0.00% GC)
+  minimum time:     442.059 μs (0.00% GC)
+  median time:      451.933 μs (0.00% GC)
+  mean time:        459.065 μs (0.00% GC)
+  maximum time:     1.203 ms (0.00% GC)
   --------------
-  samples:          9668
+  samples:          10000
   evals/sample:     1
 </pre></div>
 </div>
@@ -477,12 +484,12 @@ M_2 = \langle M^2\rangle_\mathrm{MC}
 <span class="s">Add a sample</span>
 <span class="s">&quot;&quot;&quot;</span>
 <span class="k">function</span> <span class="n">add!</span><span class="p">(</span><span class="n">acc</span><span class="o">::</span><span class="n">Accumulator</span><span class="p">,</span> <span class="n">name</span><span class="o">::</span><span class="n">String</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
-    <span class="k">if</span> <span class="o">!</span><span class="n">haskey</span><span class="p">(</span><span class="n">acc</span><span class="o">.</span><span class="n">count</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">haskey</span><span class="p">(</span><span class="n">acc</span><span class="o">.</span><span class="n">count</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+        <span class="n">acc</span><span class="o">.</span><span class="n">count</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">acc</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">.+=</span> <span class="n">data</span>
+    <span class="k">else</span>
         <span class="n">acc</span><span class="o">.</span><span class="n">count</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
         <span class="n">acc</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">copy</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
-    <span class="k">else</span>
-        <span class="n">acc</span><span class="o">.</span><span class="n">count</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
-        <span class="n">acc</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">+=</span> <span class="n">data</span>
     <span class="k">end</span>
 <span class="k">end</span>
 
@@ -548,8 +555,8 @@ We skip the first ntherm measurements.</p>
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>-76.13333333333334
-5829.866666666667
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>-75.55555555555556
+5747.555555555556
 </pre></div>
 </div>
 </div>
@@ -603,6 +610,82 @@ We skip the first ntherm measurements.</p>
 <h3>Exercise 2<a class="headerlink" href="#exercise-2" title="Permalink to this headline">¶</a></h3>
 <p>Measure the magnetic susceptibility and compare the results with the exact solution.</p>
 </div>
+</div>
+<div class="section" id="make-type-safe-accumulator">
+<h2>Make type-safe Accumulator<a class="headerlink" href="#make-type-safe-accumulator" title="Permalink to this headline">¶</a></h2>
+<p>Type safe is an important concept to achieve high performance with Julia (see <a class="reference external" href="https://docs.julialang.org/en/v1/manual/performance-tips/">officitial document</a>).
+Actually, the Accumulator class implemented above is NOT type safe.
+Let us see how crtitical it is and how to improve on it.
+A convinient way to check the type stability of your code is using &#64;code_warntype macro.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="n">acc</span> <span class="o">=</span> <span class="n">Meas</span><span class="o">.</span><span class="n">Accumulator</span><span class="p">()</span>
+<span class="nd">@code_warntype</span> <span class="n">Meas</span><span class="o">.</span><span class="n">add!</span><span class="p">(</span><span class="n">acc</span><span class="p">,</span> <span class="s">&quot;obs1&quot;</span><span class="p">,</span> <span class="n">ones</span><span class="p">(</span><span class="mi">4</span><span class="p">))</span> 
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Variables
+  #self#<span class=" -Color -Color-Cyan">::Core.Compiler.Const(Main.Meas.add!, false)</span>
+  acc<span class=" -Color -Color-Cyan">::Main.Meas.Accumulator</span>
+  name<span class=" -Color -Color-Cyan">::String</span>
+  data<span class=" -Color -Color-Cyan">::Array{Float64,1}</span>
+
+Body<span class=" -Color -Color-Bold">::Any</span>
+1 ─ %1  = Base.getproperty(acc, :count)<span class=" -Color -Color-Cyan">::Dict{String,UInt64}</span>
+│   %2  = Main.Meas.haskey(%1, name)<span class=" -Color -Color-Cyan">::Bool</span>
+└──       goto #3 if not %2
+2 ─ %4  = Base.getproperty(acc, :count)<span class=" -Color -Color-Cyan">::Dict{String,UInt64}</span>
+│   %5  = Base.getindex(%4, name)<span class=" -Color -Color-Cyan">::UInt64</span>
+│   %6  = (%5 + 1)<span class=" -Color -Color-Cyan">::UInt64</span>
+│   %7  = Base.getproperty(acc, :count)<span class=" -Color -Color-Cyan">::Dict{String,UInt64}</span>
+│         Base.setindex!(%7, %6, name)
+│   %9  = Base.getproperty(acc, :data)<span class=" -Color -Color-Cyan">::Dict{String,Any}</span>
+│   %10 = Base.dotview(%9, name)<span class=" -Color -Color-Bold">::Any</span>
+│   %11 = Base.getproperty(acc, :data)<span class=" -Color -Color-Cyan">::Dict{String,Any}</span>
+│   %12 = Base.getindex(%11, name)<span class=" -Color -Color-Bold">::Any</span>
+│   %13 = Base.broadcasted(Main.Meas.:+, %12, data)<span class=" -Color -Color-Bold">::Any</span>
+│   %14 = Base.materialize!(%10, %13)<span class=" -Color -Color-Bold">::Any</span>
+└──       return %14
+3 ─ %16 = Base.getproperty(acc, :count)<span class=" -Color -Color-Cyan">::Dict{String,UInt64}</span>
+│         Base.setindex!(%16, 1, name)
+│   %18 = Main.Meas.copy(data)<span class=" -Color -Color-Cyan">::Array{Float64,1}</span>
+│   %19 = Base.getproperty(acc, :data)<span class=" -Color -Color-Cyan">::Dict{String,Any}</span>
+│         Base.setindex!(%19, %18, name)
+└──       return %18
+</pre></div>
+</div>
+</div>
+</div>
+<p>In the above cells, you see many <strong>Any</strong>, which means that the Julia compiler failed to determine the type of some variable.
+This is always about <strong>striking a balance between performance and readability</strong>.
+Although I usually prefer the latter, it’s your choice.
+Let us see how badly the type instability affects the performance!</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="n">obs_val</span> <span class="o">=</span> <span class="n">ones</span><span class="p">(</span><span class="kt">Float64</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+<span class="nd">@benchmark</span> <span class="n">Meas</span><span class="o">.</span><span class="n">add!</span><span class="p">(</span><span class="n">acc</span><span class="p">,</span> <span class="s">&quot;obs1&quot;</span><span class="p">,</span> <span class="n">obs_val</span><span class="p">)</span> 
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>BenchmarkTools.Trial: 
+  memory estimate:  64 bytes
+  allocs estimate:  2
+  --------------
+  minimum time:     390.597 ns (0.00% GC)
+  median time:      413.199 ns (0.00% GC)
+  mean time:        453.739 ns (0.35% GC)
+  maximum time:     8.529 μs (94.19% GC)
+  --------------
+  samples:          10000
+  evals/sample:     201
+</pre></div>
+</div>
+</div>
+</div>
+<p>You can see that measuring a Float64 vector with 100 elements takes only 400 ns.
+This unlikely affects the overall performance.</p>
 </div>
 </div>
 
