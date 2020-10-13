@@ -658,7 +658,7 @@ Body<span class=" -Color -Color-Bold">::Any</span>
 </div>
 </div>
 <p>In the above cells, you see many <strong>Any</strong>, which means that the Julia compiler failed to determine the type of some variable.
-This is always about <strong>striking a balance between performance and readability</strong>.
+It is always about <strong>striking a balance between performance and readability</strong>.
 Although I usually prefer the latter, it’s your choice.
 Let us see how badly the type instability affects the performance!</p>
 <div class="cell docutils container">
@@ -685,7 +685,90 @@ Let us see how badly the type instability affects the performance!</p>
 </div>
 </div>
 <p>You can see that measuring a Float64 vector with 100 elements takes only 400 ns.
-This unlikely affects the overall performance.</p>
+This unlikely affects the overall performance in practical calculation.
+If you are unhappy with any type instability, you could do like this:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="c"># Contribution from Markus Wallerberger at TU Wien</span>
+<span class="k">module</span> <span class="n">Meas2</span>
+
+<span class="k">mutable</span> <span class="k">struct</span> <span class="n">Accumulator</span><span class="p">{</span><span class="n">T</span><span class="p">}</span>
+    <span class="n">count</span><span class="o">::</span><span class="kt">UInt64</span>
+    <span class="n">data</span><span class="o">::</span><span class="n">T</span>
+<span class="k">end</span>
+
+<span class="s">&quot;&quot;&quot;</span>
+<span class="s">Constructor</span>
+<span class="s">&quot;&quot;&quot;</span>
+<span class="n">Accumulator</span><span class="p">(</span><span class="n">initial</span><span class="o">::</span><span class="n">T</span><span class="p">)</span> <span class="n">where</span> <span class="n">T</span> <span class="o">=</span> <span class="n">Accumulator</span><span class="p">(</span><span class="kt">UInt64</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="n">initial</span><span class="p">)</span>
+
+
+<span class="s">&quot;&quot;&quot;</span>
+<span class="s">Add a sample</span>
+<span class="s">&quot;&quot;&quot;</span>
+<span class="k">function</span> <span class="n">add!</span><span class="p">(</span><span class="n">acc</span><span class="o">::</span><span class="n">Accumulator</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+    <span class="n">acc</span><span class="o">.</span><span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="n">acc</span><span class="o">.</span><span class="n">data</span> <span class="o">.+=</span> <span class="n">data</span>
+<span class="k">end</span>
+
+<span class="s">&quot;&quot;&quot;</span>
+<span class="s">Compuate mean</span>
+<span class="s">&quot;&quot;&quot;</span>
+<span class="k">function</span> <span class="n">mean</span><span class="p">(</span><span class="n">acc</span><span class="o">::</span><span class="n">Accumulator</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">acc</span><span class="o">.</span><span class="n">data</span><span class="o">/</span><span class="n">acc</span><span class="o">.</span><span class="n">count</span>
+<span class="k">end</span>
+
+<span class="k">end</span>
+
+
+<span class="c"># Perform some tests</span>
+<span class="k">let</span>
+    <span class="n">acc</span> <span class="o">=</span> <span class="n">Meas2</span><span class="o">.</span><span class="n">Accumulator</span><span class="p">(</span><span class="n">ones</span><span class="p">(</span><span class="mi">4</span><span class="p">))</span>
+    <span class="n">Meas2</span><span class="o">.</span><span class="n">add!</span><span class="p">(</span><span class="n">acc</span><span class="p">,</span> <span class="mi">2</span> <span class="o">.*</span> <span class="n">ones</span><span class="p">(</span><span class="mi">4</span><span class="p">))</span>
+    <span class="nd">@assert</span> <span class="n">Meas2</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">acc</span><span class="p">)</span> <span class="n">≈</span> <span class="mf">1.5</span> <span class="o">.*</span> <span class="n">ones</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+<span class="k">end</span>
+
+<span class="n">obs_val</span> <span class="o">=</span> <span class="n">ones</span><span class="p">(</span><span class="kt">Float64</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+<span class="n">acc2</span> <span class="o">=</span> <span class="n">Meas2</span><span class="o">.</span><span class="n">Accumulator</span><span class="p">(</span><span class="n">obs_val</span><span class="p">)</span>
+<span class="nd">@code_warntype</span> <span class="n">Meas2</span><span class="o">.</span><span class="n">add!</span><span class="p">(</span><span class="n">acc2</span><span class="p">,</span> <span class="n">obs_val</span><span class="p">)</span>
+<span class="nd">@benchmark</span> <span class="n">Meas2</span><span class="o">.</span><span class="n">add!</span><span class="p">(</span><span class="n">acc2</span><span class="p">,</span> <span class="n">obs_val</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Variables
+  #self#<span class=" -Color -Color-Cyan">::Core.Compiler.Const(Main.Meas2.add!, false)</span>
+  acc<span class=" -Color -Color-Cyan">::Main.Meas2.Accumulator{Array{Float64,1}}</span>
+  data<span class=" -Color -Color-Cyan">::Array{Float64,1}</span>
+
+Body<span class=" -Color -Color-Cyan">::Array{Float64,1}</span>
+1 ─ %1 = Base.getproperty(acc, :count)<span class=" -Color -Color-Cyan">::UInt64</span>
+│   %2 = (%1 + 1)<span class=" -Color -Color-Cyan">::UInt64</span>
+│        Base.setproperty!(acc, :count, %2)
+│   %4 = Base.getproperty(acc, :data)<span class=" -Color -Color-Cyan">::Array{Float64,1}</span>
+│   %5 = Base.broadcasted(Main.Meas2.:+, %4, data)<span class=" -Color -Color-Cyan">::Base.Broadcast.Broadcasted{Base.Broadcast.DefaultArrayStyle{1},Nothing,typeof(+),Tuple{Array{Float64,1},Array{Float64,1}}}</span>
+│   %6 = Base.materialize!(%4, %5)<span class=" -Color -Color-Cyan">::Array{Float64,1}</span>
+└──      return %6
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>WARNING: replacing module Meas2.
+</pre></div>
+</div>
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>BenchmarkTools.Trial: 
+  memory estimate:  0 bytes
+  allocs estimate:  0
+  --------------
+  minimum time:     68.678 ns (0.00% GC)
+  median time:      73.246 ns (0.00% GC)
+  mean time:        81.052 ns (0.00% GC)
+  maximum time:     267.550 ns (0.00% GC)
+  --------------
+  samples:          10000
+  evals/sample:     968
+</pre></div>
+</div>
+</div>
+</div>
 </div>
 </div>
 
