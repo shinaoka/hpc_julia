@@ -1,0 +1,449 @@
+
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Replica exchange Monte Carlo &#8212; HPC exercise in Julia</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/all.min.css" integrity="sha384-KA6wR/X5RY4zFAHpv/CnoG2UW1uogYfdnP67Uv7eULvTveboZJg0qUpmJZb5VqzN" crossorigin="anonymous">
+    <link href="../_static/css/index.css" rel="stylesheet">
+    <link rel="stylesheet" href="../_static/sphinx-book-theme.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/mystnb.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-thebe.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/spanels-index--0afa1ebdab0bb23b98b56d34c23d9f57.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/spanels-variables--ffc7f74dcb1b9eecba2dbcbc22818714.css" />
+    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/language_data.js"></script>
+    <script src="../_static/togglebutton.js"></script>
+    <script src="../_static/clipboard.min.js"></script>
+    <script src="../_static/copybutton.js"></script>
+    <script src="../_static/sphinx-book-theme.js"></script>
+    <script >var togglebuttonSelector = '.toggle, .admonition.dropdown, .tag_hide_input div.cell_input, .tag_hide-input div.cell_input, .tag_hide_output div.cell_output, .tag_hide-output div.cell_output, .tag_hide_cell.cell, .tag_hide-cell.cell';</script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["\\(", "\\)"]], "displayMath": [["\\[", "\\]"]], "processRefs": false, "processEnvironments": false}})</script>
+    <script async="async" src="https://unpkg.com/thebelab@latest/lib/index.js"></script>
+    <script >
+        const thebe_selector = ".thebe"
+        const thebe_selector_input = "pre"
+        const thebe_selector_output = ".output"
+    </script>
+    <script async="async" src="../_static/sphinx-thebe.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="docsearch:language" content="en">
+
+
+
+  </head>
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="80">
+    
+
+    <div class="container-xl">
+      <div class="row">
+          
+<div class="col-12 col-md-3 bd-sidebar site-navigation show" id="site-navigation">
+    
+        <div class="navbar-brand-box">
+<a class="navbar-brand text-wrap" href="../index.html">
+  
+  
+  <h1 class="site-logo" id="site-title">HPC exercise in Julia</h1>
+  
+</a>
+</div>
+
+<form class="bd-search d-flex align-items-center" action="../search.html" method="get">
+  <i class="icon fas fa-search"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search this book..." aria-label="Search this book..." autocomplete="off" >
+</form>
+
+<nav class="bd-links" id="bd-docs-nav" aria-label="Main navigation">
+  <p class="caption">
+ <span class="caption-text">
+  Introduction
+ </span>
+</p>
+<ul class="nav sidenav_l1">
+ <li class="toctree-l1">
+  <a class="reference internal" href="preparation.html">
+   Preparation
+  </a>
+ </li>
+</ul>
+<p class="caption">
+ <span class="caption-text">
+  Classical Monte Carlo simulation
+ </span>
+</p>
+<ul class="nav sidenav_l1">
+ <li class="toctree-l1">
+  <a class="reference internal" href="mc.html">
+   概要
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="1dIsing.html">
+   1D Ising model
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="2dIsing.html">
+   2D Ising model
+  </a>
+ </li>
+</ul>
+
+</nav>
+
+ <!-- To handle the deprecated key -->
+
+<div class="navbar_extra_footer">
+  Powered by <a href="https://jupyterbook.org">Jupyter Book</a>
+</div>
+
+</div>
+
+
+          
+
+
+          
+<main class="col py-md-3 pl-md-4 bd-content overflow-auto" role="main">
+    
+    <div class="row topbar fixed-top container-xl">
+    <div class="col-12 col-md-3 bd-topbar-whitespace site-navigation show">
+    </div>
+    <div class="col pl-2 topbar-main">
+        
+        <button id="navbar-toggler" class="navbar-toggler ml-0" type="button" data-toggle="collapse"
+            data-toggle="tooltip" data-placement="bottom" data-target=".site-navigation" aria-controls="navbar-menu"
+            aria-expanded="true" aria-label="Toggle navigation" aria-controls="site-navigation"
+            title="Toggle navigation" data-toggle="tooltip" data-placement="left">
+            <i class="fas fa-bars"></i>
+            <i class="fas fa-arrow-left"></i>
+            <i class="fas fa-arrow-up"></i>
+        </button>
+        
+        <div class="dropdown-buttons-trigger">
+    <button id="dropdown-buttons-trigger" class="btn btn-secondary topbarbtn" aria-label="Download this page"><i
+            class="fas fa-download"></i></button>
+
+    
+    <div class="dropdown-buttons">
+        <!-- ipynb file if we had a myst markdown file -->
+        
+        <!-- Download raw file -->
+        <a class="dropdown-buttons" href="../_sources/docs/replica_mc.ipynb"><button type="button"
+                class="btn btn-secondary topbarbtn" title="Download source file" data-toggle="tooltip"
+                data-placement="left">.ipynb</button></a>
+        <!-- Download PDF via print -->
+        <button type="button" id="download-print" class="btn btn-secondary topbarbtn" title="Print to PDF"
+            onClick="window.print()" data-toggle="tooltip" data-placement="left">.pdf</button>
+    </div>
+    
+</div>
+        <!-- Source interaction buttons -->
+
+
+        <!-- Full screen (wrap in <a> to have style consistency -->
+        <a class="full-screen-button"><button type="button" class="btn btn-secondary topbarbtn" data-toggle="tooltip"
+                data-placement="bottom" onclick="toggleFullScreen()" title="Fullscreen mode"><i
+                    class="fas fa-expand"></i></button></a>
+
+        <!-- Launch buttons -->
+
+<div class="dropdown-buttons-trigger">
+    <button id="dropdown-buttons-trigger" class="btn btn-secondary topbarbtn"
+        aria-label="Launch interactive content"><i class="fas fa-rocket"></i></button>
+    <div class="dropdown-buttons">
+        
+        <a class="binder-button" href="https://mybinder.org/v2/gh/shinaoka/hpc_julia.git/master?urlpath=tree/docs/replica_mc.ipynb"><button type="button"
+                class="btn btn-secondary topbarbtn" title="Launch Binder" data-toggle="tooltip"
+                data-placement="left"><img class="binder-button-logo"
+                    src="../_static/images/logo_binder.svg"
+                    alt="Interact on binder">Binder</button></a>
+        
+        
+        
+        <a class="colab-button" href="https://colab.research.google.com/github/shinaoka/hpc_julia.git/blob/master/docs/replica_mc.ipynb"><button type="button" class="btn btn-secondary topbarbtn"
+                title="Launch Colab" data-toggle="tooltip" data-placement="left"><img class="colab-button-logo"
+                    src="../_static/images/logo_colab.png"
+                    alt="Interact on Colab">Colab</button></a>
+        
+        
+    </div>
+</div>
+
+    </div>
+
+    <!-- Table of contents -->
+    <div class="d-none d-md-block col-md-2 bd-toc show">
+        <div class="tocsection onthispage pt-5 pb-3">
+            <i class="fas fa-list"></i> Contents
+        </div>
+        <nav id="bd-toc-nav">
+            <ul class="nav section-nav flex-column">
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#preparation">
+   Preparation
+  </a>
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#id1">
+     Replica Exchange Monte Carlo
+    </a>
+   </li>
+  </ul>
+ </li>
+</ul>
+
+        </nav>
+    </div>
+</div>
+    <div id="main-content" class="row">
+        <div class="col-12 col-md-9 pl-md-3 pr-md-0">
+        
+              <div>
+                
+  <div class="section" id="replica-exchange-monte-carlo">
+<h1>Replica exchange Monte Carlo<a class="headerlink" href="#replica-exchange-monte-carlo" title="Permalink to this headline">¶</a></h1>
+<p>We consider exactly the same 1D ising model as in the previous section.
+In this section, we will how we implement the replica exchange Monte Carlo method.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="nd">@show</span> <span class="nb">VERSION</span>
+<span class="k">using</span> <span class="n">BenchmarkTools</span><span class="p">,</span> <span class="n">Random</span><span class="p">,</span> <span class="n">Revise</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>VERSION = v&quot;1.5.2&quot;
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="preparation">
+<h2>Preparation<a class="headerlink" href="#preparation" title="Permalink to this headline">¶</a></h2>
+<p>We now repeat the implementation of the single-spin-flip update and measurement given in the previous section.
+You can save these codes in mc.jl and include it in the following cell.
+Here, we use <strong>includet</strong> in Revise.jl instead of <strong>include</strong> in the standard library.
+<strong>includet</strong> tracks any changes the included file and reload the code if any.</p>
+<p>Please download <span class="xref myst">mc.jl</span> and <span class="xref myst">meas.jl</span> and save them in your working directory.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="n">includet</span><span class="p">(</span><span class="s">&quot;mc.jl&quot;</span><span class="p">)</span>
+<span class="n">includet</span><span class="p">(</span><span class="s">&quot;meas.jl&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="k">function</span> <span class="n">solve!</span><span class="p">(</span><span class="n">ss</span><span class="p">,</span> <span class="n">acc</span><span class="p">,</span> <span class="n">β</span><span class="p">,</span> <span class="n">nsteps</span><span class="p">,</span> <span class="n">ntherm_steps</span><span class="p">,</span> <span class="n">interval_meas</span><span class="p">,</span> <span class="n">rng</span><span class="p">)</span>
+    <span class="c"># 1 Monte Carlo step = 1 sweep through the system</span>
+    <span class="n">num_sweeps_per_step</span> <span class="o">=</span> <span class="mi">1</span>
+    
+    <span class="c"># Thermalization steps</span>
+    <span class="n">MC</span><span class="o">.</span><span class="n">update!</span><span class="p">(</span><span class="n">ss</span><span class="p">,</span> <span class="n">β</span><span class="p">,</span> <span class="n">ntherm_steps</span><span class="p">,</span> <span class="n">rng</span><span class="p">)</span>
+    
+    <span class="c"># Measurement steps</span>
+    <span class="k">for</span> <span class="n">istep</span> <span class="kp">in</span> <span class="mi">1</span><span class="o">:</span><span class="n">nsteps</span>
+        <span class="n">MC</span><span class="o">.</span><span class="n">update!</span><span class="p">(</span><span class="n">ss</span><span class="p">,</span> <span class="n">β</span><span class="p">,</span> <span class="n">num_sweeps_per_step</span><span class="p">,</span> <span class="n">rng</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">mod</span><span class="p">(</span><span class="n">istep</span><span class="p">,</span> <span class="n">interval_meas</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span>
+            <span class="k">continue</span>
+        <span class="k">end</span>
+        <span class="n">Meas</span><span class="o">.</span><span class="n">add!</span><span class="p">(</span><span class="n">acc</span><span class="p">,</span> <span class="s">&quot;E&quot;</span><span class="p">,</span> <span class="kt">Float64</span><span class="p">(</span><span class="n">ss</span><span class="o">.</span><span class="n">energy</span><span class="p">))</span>
+        <span class="n">Meas</span><span class="o">.</span><span class="n">add!</span><span class="p">(</span><span class="n">acc</span><span class="p">,</span> <span class="s">&quot;E2&quot;</span><span class="p">,</span> <span class="kt">Float64</span><span class="p">(</span><span class="n">ss</span><span class="o">.</span><span class="n">energy</span><span class="p">)</span><span class="o">^</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">MC</span><span class="o">.</span><span class="n">sanity_check</span><span class="p">(</span><span class="n">ss</span><span class="p">)</span>
+    <span class="k">end</span>
+<span class="k">end</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>solve! (generic function with 1 method)
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="id1">
+<h3>Replica Exchange Monte Carlo<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<p>In the replica exchange Monte Carlo method,
+exchanges between two replicas with different inverse temperatures <span class="math notranslate nohighlight">\(\beta_1\)</span> and <span class="math notranslate nohighlight">\(\beta_2\)</span> are accepted with the probability</p>
+<div class="math notranslate nohighlight">
+\[
+P_\mathrm{ex} = \mathrm{min}\Big\{1, e^{(\beta_1-\beta_2)(E_1 - E_2)} \Big\},
+\]</div>
+<p>where <span class="math notranslate nohighlight">\(E_1\)</span> and <span class="math notranslate nohighlight">\(E_2\)</span> are the energies of the two replicas.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">Replica exchante update between the i-th and j-the replicas.</span>
+<span class="s">&quot;&quot;&quot;</span>
+<span class="k">function</span> <span class="n">rex!</span><span class="p">(</span><span class="n">βs</span><span class="p">,</span> <span class="n">replicas</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">rng</span><span class="p">)</span>
+    <span class="n">prop_ex</span> <span class="o">=</span> <span class="n">exp</span><span class="p">((</span><span class="n">βs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">-</span><span class="n">βs</span><span class="p">[</span><span class="n">j</span><span class="p">])</span><span class="o">*</span><span class="p">(</span><span class="n">replicas</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">energy</span><span class="o">-</span><span class="n">replicas</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">energy</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">rand</span><span class="p">(</span><span class="n">rng</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">prop_ex</span>
+        <span class="n">replicas</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">replicas</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">replicas</span><span class="p">[</span><span class="n">j</span><span class="p">],</span> <span class="n">replicas</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+    <span class="k">end</span>
+<span class="k">end</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>rex!
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="k">function</span> <span class="n">solve_rex!</span><span class="p">(</span><span class="n">replicas</span><span class="p">,</span> <span class="n">accumulators</span><span class="p">,</span> <span class="n">βs</span><span class="p">,</span> <span class="n">nsweeps</span><span class="p">,</span> <span class="n">ntherm</span><span class="p">,</span> <span class="n">interval_meas</span><span class="p">,</span> <span class="n">rng</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">mod</span><span class="p">(</span><span class="n">nsweeps</span><span class="p">,</span> <span class="n">interval_meas</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span>
+        <span class="n">error</span><span class="p">(</span><span class="s">&quot;nsweeps cannot be divided by interval_meas!&quot;</span><span class="p">)</span>
+    <span class="k">end</span>
+    <span class="n">num_replicas</span> <span class="o">=</span> <span class="n">length</span><span class="p">(</span><span class="n">βs</span><span class="p">)</span>
+    
+    <span class="c"># Do interval_meas sweeps and one rex step </span>
+    <span class="k">function</span> <span class="n">do_sweeps</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="kp">in</span> <span class="mi">1</span><span class="o">:</span><span class="n">num_replicas</span>
+            <span class="n">MC</span><span class="o">.</span><span class="n">update!</span><span class="p">(</span><span class="n">replicas</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">βs</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">interval_meas</span><span class="p">,</span> <span class="n">rng</span><span class="p">)</span>
+        <span class="k">end</span>
+        <span class="c">#for i in 1:num_replicas-1</span>
+        <span class="c">#    rex!(βs, replicas, i, i+1, rng)</span>
+        <span class="c">#end</span>
+    <span class="k">end</span>
+
+    <span class="c"># Thermalization steps</span>
+    <span class="k">for</span> <span class="n">_</span> <span class="kp">in</span> <span class="mi">1</span><span class="o">:</span><span class="p">(</span><span class="n">ntherm</span><span class="o">//</span><span class="n">interval_meas</span><span class="p">)</span>
+        <span class="n">do_sweeps</span><span class="p">()</span>
+    <span class="k">end</span>
+    
+    <span class="c"># Measurement steps</span>
+    <span class="k">for</span> <span class="n">imeas</span> <span class="kp">in</span> <span class="mi">1</span><span class="o">:</span><span class="p">(</span><span class="n">nsweeps</span><span class="o">//</span><span class="n">interval_meas</span><span class="p">)</span>
+        <span class="n">do_sweeps</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="kp">in</span> <span class="mi">1</span><span class="o">:</span><span class="n">num_replicas</span>
+            <span class="n">Meas</span><span class="o">.</span><span class="n">add!</span><span class="p">(</span><span class="n">accumulators</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="s">&quot;E&quot;</span><span class="p">,</span> <span class="kt">Float64</span><span class="p">(</span><span class="n">replicas</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">energy</span><span class="p">))</span>
+            <span class="n">Meas</span><span class="o">.</span><span class="n">add!</span><span class="p">(</span><span class="n">accumulators</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="s">&quot;E2&quot;</span><span class="p">,</span> <span class="kt">Float64</span><span class="p">(</span><span class="n">replicas</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">energy</span><span class="p">)</span><span class="o">^</span><span class="mi">2</span><span class="p">)</span>
+        <span class="k">end</span>
+    <span class="k">end</span>
+<span class="k">end</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>solve_rex! (generic function with 1 method)
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="n">nsweeps</span> <span class="o">=</span> <span class="mi">10</span><span class="o">^</span><span class="mi">7</span>
+<span class="n">interval_meas</span> <span class="o">=</span> <span class="mi">10</span>
+<span class="n">ntherm</span> <span class="o">=</span> <span class="n">nsweeps</span><span class="o">//</span><span class="mi">10</span>
+
+<span class="n">numβ</span> <span class="o">=</span> <span class="mi">10</span>
+<span class="n">Ts_mc</span> <span class="o">=</span> <span class="n">collect</span><span class="p">(</span><span class="n">range</span><span class="p">(</span><span class="mf">0.4</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="n">numβ</span><span class="p">))</span>
+<span class="n">βs</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">./</span> <span class="n">Ts_mc</span>
+
+<span class="c"># Construct nβ replicas and accumulators</span>
+<span class="n">replicas</span> <span class="o">=</span> <span class="n">collect</span><span class="p">((</span><span class="n">MC</span><span class="o">.</span><span class="n">SpinState</span><span class="p">(</span><span class="n">s0</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="kp">in</span> <span class="mi">1</span><span class="o">:</span><span class="n">numβ</span><span class="p">))</span>
+<span class="n">accumulators</span> <span class="o">=</span> <span class="n">collect</span><span class="p">((</span><span class="n">Meas</span><span class="o">.</span><span class="n">Accumulator</span><span class="p">()</span> <span class="k">for</span> <span class="n">_</span> <span class="kp">in</span> <span class="mi">1</span><span class="o">:</span><span class="n">numβ</span><span class="p">))</span>
+
+<span class="n">solve_rex!</span><span class="p">(</span><span class="n">replicas</span><span class="p">,</span> <span class="n">accumulators</span><span class="p">,</span> <span class="n">βs</span><span class="p">,</span> <span class="n">nsweeps</span><span class="p">,</span> <span class="n">ntherm</span><span class="p">,</span> <span class="n">interval_meas</span><span class="p">,</span> <span class="n">rng</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="n">C_mc</span> <span class="o">=</span> <span class="n">collect</span><span class="p">((</span><span class="n">Meas</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">acc</span><span class="p">,</span> <span class="s">&quot;E2&quot;</span><span class="p">)</span> <span class="o">-</span> <span class="n">Meas</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">acc</span><span class="p">,</span> <span class="s">&quot;E&quot;</span><span class="p">)</span><span class="o">^</span><span class="mi">2</span> <span class="k">for</span> <span class="n">acc</span> <span class="kp">in</span> <span class="n">accumulators</span><span class="p">))</span> <span class="o">.*</span> <span class="p">(</span><span class="n">βs</span><span class="o">.^</span><span class="mi">2</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>Let us compare Monte Carlo results with the exact solution <span class="math notranslate nohighlight">\(C/N = \frac{1}{T^2 \cosh^2(1/T)}\)</span>.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="k">using</span> <span class="n">PyPlot</span>
+<span class="n">Ts</span> <span class="o">=</span> <span class="n">range</span><span class="p">(</span><span class="mf">0.1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+<span class="n">exact_C</span><span class="p">(</span><span class="n">T</span><span class="p">)</span> <span class="o">=</span> <span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="n">T</span> <span class="o">*</span> <span class="n">cosh</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="n">T</span><span class="p">))</span><span class="o">^</span><span class="mi">2</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">Ts</span><span class="p">,</span> <span class="n">exact_C</span><span class="o">.</span><span class="p">(</span><span class="n">Ts</span><span class="p">),</span> <span class="n">label</span><span class="o">=</span><span class="s">&quot;Exact&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">Ts_mc</span><span class="p">,</span> <span class="n">C_mc</span> <span class="o">./</span> <span class="n">num_spins</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s">&quot;MC&quot;</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="s">&quot;o&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="n">raw</span><span class="s">&quot;</span><span class="si">$T</span><span class="s">$&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="n">raw</span><span class="s">&quot;</span><span class="si">$C</span><span class="s">/N$&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlim</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="nb">nothing</span><span class="p">])</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="nb">nothing</span><span class="p">])</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+<span class="p">;</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/replica_mc_12_0.png" src="../_images/replica_mc_12_0.png" />
+</div>
+</div>
+</div>
+</div>
+</div>
+
+    <script type="text/x-thebe-config">
+    {
+        requestKernel: true,
+        binderOptions: {
+            repo: "binder-examples/jupyter-stacks-datascience",
+            ref: "master",
+        },
+        codeMirrorConfig: {
+            theme: "abcdef",
+            mode: "julia-1.5"
+        },
+        kernelOptions: {
+            kernelName: "julia-1.5",
+            path: "./docs"
+        },
+        predefinedOutput: true
+    }
+    </script>
+    <script>kernelName = 'julia-1.5'</script>
+
+              </div>
+              
+        </div>
+    </div>
+    
+    
+    <div class='prev-next-bottom'>
+        
+
+    </div>
+    <footer class="footer mt-5 mt-md-0">
+    <div class="container">
+      <p>
+        
+          By Hiroshi Shinaoka<br/>
+        
+            &copy; Copyright 2020.<br/>
+      </p>
+    </div>
+  </footer>
+</main>
+
+
+      </div>
+    </div>
+
+    <script src="../_static/js/index.js"></script>
+    
+  </body>
+</html>

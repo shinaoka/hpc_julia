@@ -96,6 +96,11 @@
    1D Ising model
   </a>
  </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="2dIsing.html">
+   2D Ising model
+  </a>
+ </li>
 </ul>
 
 </nav>
@@ -238,18 +243,15 @@
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="n">d</span> <span class="o">=</span> <span class="kt">Dict</span><span class="p">{</span><span class="n">String</span><span class="p">,</span><span class="kt">Any</span><span class="p">}()</span>
-<span class="n">v</span> <span class="o">=</span> <span class="n">zeros</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
-<span class="n">d</span><span class="p">[</span><span class="s">&quot;k&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">copy</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
-<span class="n">println</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="s">&quot;k&quot;</span><span class="p">])</span>
-<span class="n">v</span><span class="o">.+=</span> <span class="mi">1</span>
-<span class="n">print</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="s">&quot;k&quot;</span><span class="p">])</span>
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="n">N</span><span class="p">,</span> <span class="n">M</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">4</span>
+<span class="n">reshape</span><span class="p">(</span><span class="n">collect</span><span class="p">((</span><span class="n">i</span> <span class="o">+</span> <span class="mi">2</span><span class="o">*</span><span class="n">j</span> <span class="k">for</span> <span class="n">j</span> <span class="kp">in</span> <span class="mi">1</span><span class="o">:</span><span class="n">M</span> <span class="k">for</span> <span class="n">i</span> <span class="kp">in</span> <span class="mi">1</span><span class="o">:</span><span class="n">N</span><span class="p">)),</span> <span class="n">N</span><span class="p">,</span> <span class="n">M</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>[0.0, 0.0, 0.0, 0.0]
-[0.0, 0.0, 0.0, 0.0]
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2×4 Array{Int64,2}:
+ 3  5  7   9
+ 4  6  8  10
 </pre></div>
 </div>
 </div>
@@ -385,12 +387,57 @@
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="mi">1</span>
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="k">using</span> <span class="n">BenchmarkTools</span>
+
+<span class="n">x</span> <span class="o">=</span> <span class="n">zeros</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">zeros</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span>
+
+<span class="k">function</span> <span class="n">test_f</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+     <span class="n">x</span> <span class="o">+=</span> <span class="n">y</span>
+<span class="k">end</span>
+
+<span class="nd">@benchmark</span> <span class="n">test_f</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>1
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>BenchmarkTools.Trial: 
+  memory estimate:  896 bytes
+  allocs estimate:  1
+  --------------
+  minimum time:     70.084 ns (0.00% GC)
+  median time:      75.993 ns (0.00% GC)
+  mean time:        89.716 ns (5.99% GC)
+  maximum time:     842.431 ns (70.46% GC)
+  --------------
+  samples:          10000
+  evals/sample:     977
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="k">function</span> <span class="n">test_f2</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+     <span class="n">x</span> <span class="o">.+=</span> <span class="n">y</span>
+<span class="k">end</span>
+
+<span class="nd">@benchmark</span> <span class="n">test_f2</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>BenchmarkTools.Trial: 
+  memory estimate:  0 bytes
+  allocs estimate:  0
+  --------------
+  minimum time:     26.374 ns (0.00% GC)
+  median time:      28.405 ns (0.00% GC)
+  mean time:        31.012 ns (0.00% GC)
+  maximum time:     147.199 ns (0.00% GC)
+  --------------
+  samples:          10000
+  evals/sample:     993
 </pre></div>
 </div>
 </div>
