@@ -273,12 +273,12 @@ The following code was modified from the original code to use the same update al
   memory estimate:  160 bytes
   allocs estimate:  1
   --------------
-  minimum time:     55.107 ms (0.00% GC)
-  median time:      57.960 ms (0.00% GC)
-  mean time:        58.224 ms (0.00% GC)
-  maximum time:     66.380 ms (0.00% GC)
+  minimum time:     55.724 ms (0.00% GC)
+  median time:      59.749 ms (0.00% GC)
+  mean time:        60.413 ms (0.00% GC)
+  maximum time:     75.154 ms (0.00% GC)
   --------------
-  samples:          86
+  samples:          83
   evals/sample:     1
 </pre></div>
 </div>
@@ -294,13 +294,12 @@ We first define a struc for storing the spatial structure of the interactions.</
 
 <span class="k">struct</span> <span class="n">JModel</span>
     <span class="n">connected_sites</span><span class="o">::</span><span class="kt">Array</span><span class="p">{</span><span class="kt">Int32</span><span class="p">,</span><span class="mi">2</span><span class="p">}</span>
-    <span class="c"># Using Array{Int8} will ruin the performance a lot! (Note missing &quot;1&quot;!)</span>
-    <span class="n">coord_num</span><span class="o">::</span><span class="kt">Vector</span><span class="p">{</span><span class="kt">Int8</span><span class="p">}</span>
+    <span class="n">coord_num</span><span class="o">::</span><span class="kt">Int8</span>
 <span class="k">end</span>
 
 <span class="c"># Compute energy</span>
 <span class="n">compute_effective_field</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">ispin</span><span class="p">,</span> <span class="n">jmodel</span><span class="p">)</span> <span class="o">=</span>
-    <span class="n">sum</span><span class="p">((</span><span class="n">s</span><span class="p">[</span><span class="n">jmodel</span><span class="o">.</span><span class="n">connected_sites</span><span class="p">[</span><span class="n">j</span><span class="p">,</span> <span class="n">ispin</span><span class="p">]]</span> <span class="k">for</span> <span class="n">j</span> <span class="kp">in</span> <span class="mi">1</span><span class="o">:</span><span class="n">jmodel</span><span class="o">.</span><span class="n">coord_num</span><span class="p">[</span><span class="n">ispin</span><span class="p">]))</span>
+    <span class="n">sum</span><span class="p">((</span><span class="n">s</span><span class="p">[</span><span class="n">jmodel</span><span class="o">.</span><span class="n">connected_sites</span><span class="p">[</span><span class="n">j</span><span class="p">,</span> <span class="n">ispin</span><span class="p">]]</span> <span class="k">for</span> <span class="n">j</span> <span class="kp">in</span> <span class="mi">1</span><span class="o">:</span><span class="n">jmodel</span><span class="o">.</span><span class="n">coord_num</span><span class="p">))</span>
 
 <span class="k">function</span> <span class="n">ising_update!</span><span class="p">(</span><span class="n">jmodel</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">β</span><span class="p">,</span> <span class="n">niters</span><span class="p">,</span> <span class="n">max_h</span><span class="p">,</span> <span class="n">rng</span><span class="p">)</span>
     <span class="n">num_spins</span> <span class="o">=</span> <span class="n">length</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
@@ -338,7 +337,7 @@ We first define a struc for storing the spatial structure of the interactions.</
            <span class="n">sites</span><span class="p">[</span><span class="n">d</span><span class="p">,</span> <span class="n">isite</span><span class="p">]</span> <span class="o">=</span> <span class="n">to_site_idx</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="n">disp</span><span class="p">[</span><span class="n">d</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="n">j</span><span class="o">+</span><span class="n">disp</span><span class="p">[</span><span class="n">d</span><span class="p">][</span><span class="mi">2</span><span class="p">])</span>
         <span class="k">end</span>
     <span class="k">end</span>
-    <span class="n">MC</span><span class="o">.</span><span class="n">JModel</span><span class="p">(</span><span class="n">sites</span><span class="p">,</span> <span class="n">fill</span><span class="p">(</span><span class="kt">Int8</span><span class="p">(</span><span class="mi">4</span><span class="p">),</span> <span class="n">L</span><span class="o">^</span><span class="mi">2</span><span class="p">))</span>
+    <span class="n">MC</span><span class="o">.</span><span class="n">JModel</span><span class="p">(</span><span class="n">sites</span><span class="p">,</span> <span class="kt">Int8</span><span class="p">(</span><span class="mi">4</span><span class="p">))</span>
 <span class="k">end</span>
 <span class="p">;</span>
 </pre></div>
@@ -363,18 +362,18 @@ We first define a struc for storing the spatial structure of the interactions.</
   memory estimate:  160 bytes
   allocs estimate:  1
   --------------
-  minimum time:     69.892 ms (0.00% GC)
-  median time:      73.658 ms (0.00% GC)
-  mean time:        73.792 ms (0.00% GC)
-  maximum time:     77.551 ms (0.00% GC)
+  minimum time:     61.027 ms (0.00% GC)
+  median time:      67.081 ms (0.00% GC)
+  mean time:        67.864 ms (0.00% GC)
+  maximum time:     87.370 ms (0.00% GC)
   --------------
-  samples:          68
+  samples:          74
   evals/sample:     1
 </pre></div>
 </div>
 </div>
 </div>
-<p>This general code runs slower than the original code by around 25% because the structure of the interactions is not hardcoded.</p>
+<p>This general code runs slower than the original code only by around 6% although the structure of the interactions is not hardcoded.</p>
 </div>
 
     <script type="text/x-thebe-config">
