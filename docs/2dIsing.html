@@ -273,10 +273,10 @@ The following code was modified from the original code to use the same update al
   memory estimate:  160 bytes
   allocs estimate:  1
   --------------
-  minimum time:     54.388 ms (0.00% GC)
-  median time:      58.492 ms (0.00% GC)
-  mean time:        58.486 ms (0.00% GC)
-  maximum time:     65.631 ms (0.00% GC)
+  minimum time:     55.107 ms (0.00% GC)
+  median time:      57.960 ms (0.00% GC)
+  mean time:        58.224 ms (0.00% GC)
+  maximum time:     66.380 ms (0.00% GC)
   --------------
   samples:          86
   evals/sample:     1
@@ -298,7 +298,9 @@ We first define a struc for storing the spatial structure of the interactions.</
     <span class="n">coord_num</span><span class="o">::</span><span class="kt">Vector</span><span class="p">{</span><span class="kt">Int8</span><span class="p">}</span>
 <span class="k">end</span>
 
-<span class="n">compute_effective_field</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">ispin</span><span class="p">,</span> <span class="n">jmodel</span><span class="p">)</span> <span class="o">=</span> <span class="n">sum</span><span class="p">((</span><span class="n">s</span><span class="p">[</span><span class="n">jmodel</span><span class="o">.</span><span class="n">connected_sites</span><span class="p">[</span><span class="n">j</span><span class="p">,</span> <span class="n">ispin</span><span class="p">]]</span> <span class="k">for</span> <span class="n">j</span> <span class="kp">in</span> <span class="mi">1</span><span class="o">:</span><span class="n">jmodel</span><span class="o">.</span><span class="n">coord_num</span><span class="p">[</span><span class="n">ispin</span><span class="p">]))</span>
+<span class="c"># Compute energy</span>
+<span class="n">compute_effective_field</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">ispin</span><span class="p">,</span> <span class="n">jmodel</span><span class="p">)</span> <span class="o">=</span>
+    <span class="n">sum</span><span class="p">((</span><span class="n">s</span><span class="p">[</span><span class="n">jmodel</span><span class="o">.</span><span class="n">connected_sites</span><span class="p">[</span><span class="n">j</span><span class="p">,</span> <span class="n">ispin</span><span class="p">]]</span> <span class="k">for</span> <span class="n">j</span> <span class="kp">in</span> <span class="mi">1</span><span class="o">:</span><span class="n">jmodel</span><span class="o">.</span><span class="n">coord_num</span><span class="p">[</span><span class="n">ispin</span><span class="p">]))</span>
 
 <span class="k">function</span> <span class="n">ising_update!</span><span class="p">(</span><span class="n">jmodel</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">β</span><span class="p">,</span> <span class="n">niters</span><span class="p">,</span> <span class="n">max_h</span><span class="p">,</span> <span class="n">rng</span><span class="p">)</span>
     <span class="n">num_spins</span> <span class="o">=</span> <span class="n">length</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
@@ -314,11 +316,7 @@ We first define a struc for storing the spatial structure of the interactions.</
 <span class="k">end</span>
 
 <span class="k">end</span>
-</pre></div>
-</div>
-</div>
-<div class="cell_output docutils container">
-<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Main.MC
+<span class="p">;</span>
 </pre></div>
 </div>
 </div>
@@ -334,21 +332,15 @@ We first define a struc for storing the spatial structure of the interactions.</
     <span class="n">mymod</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">=</span> <span class="n">mod</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="n">L</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">L</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
     <span class="n">to_site_idx</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">)</span> <span class="o">=</span> <span class="n">mymod</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">+</span> <span class="n">L</span><span class="o">*</span><span class="p">(</span><span class="n">mymod</span><span class="p">(</span><span class="n">j</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
     <span class="n">disp</span> <span class="o">=</span> <span class="p">[[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]]</span>
-    <span class="k">for</span> <span class="n">j</span> <span class="kp">in</span> <span class="mi">1</span><span class="o">:</span><span class="n">L</span>
-        <span class="k">for</span> <span class="n">i</span> <span class="kp">in</span> <span class="mi">1</span><span class="o">:</span><span class="n">L</span>
-            <span class="n">isite</span> <span class="o">=</span> <span class="n">to_site_idx</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">)</span>
-            <span class="k">for</span> <span class="n">d</span> <span class="kp">in</span> <span class="mi">1</span><span class="o">:</span><span class="mi">4</span>
-               <span class="n">sites</span><span class="p">[</span><span class="n">d</span><span class="p">,</span> <span class="n">isite</span><span class="p">]</span> <span class="o">=</span> <span class="n">to_site_idx</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="n">disp</span><span class="p">[</span><span class="n">d</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="n">j</span><span class="o">+</span><span class="n">disp</span><span class="p">[</span><span class="n">d</span><span class="p">][</span><span class="mi">2</span><span class="p">])</span>
-            <span class="k">end</span>
+    <span class="k">for</span> <span class="n">j</span> <span class="kp">in</span> <span class="mi">1</span><span class="o">:</span><span class="n">L</span><span class="p">,</span> <span class="n">i</span> <span class="kp">in</span> <span class="mi">1</span><span class="o">:</span><span class="n">L</span>
+        <span class="n">isite</span> <span class="o">=</span> <span class="n">to_site_idx</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">d</span> <span class="kp">in</span> <span class="mi">1</span><span class="o">:</span><span class="mi">4</span>
+           <span class="n">sites</span><span class="p">[</span><span class="n">d</span><span class="p">,</span> <span class="n">isite</span><span class="p">]</span> <span class="o">=</span> <span class="n">to_site_idx</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="n">disp</span><span class="p">[</span><span class="n">d</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="n">j</span><span class="o">+</span><span class="n">disp</span><span class="p">[</span><span class="n">d</span><span class="p">][</span><span class="mi">2</span><span class="p">])</span>
         <span class="k">end</span>
     <span class="k">end</span>
     <span class="n">MC</span><span class="o">.</span><span class="n">JModel</span><span class="p">(</span><span class="n">sites</span><span class="p">,</span> <span class="n">fill</span><span class="p">(</span><span class="kt">Int8</span><span class="p">(</span><span class="mi">4</span><span class="p">),</span> <span class="n">L</span><span class="o">^</span><span class="mi">2</span><span class="p">))</span>
 <span class="k">end</span>
-</pre></div>
-</div>
-</div>
-<div class="cell_output docutils container">
-<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>nn_model_2D
+<span class="p">;</span>
 </pre></div>
 </div>
 </div>
@@ -371,12 +363,12 @@ We first define a struc for storing the spatial structure of the interactions.</
   memory estimate:  160 bytes
   allocs estimate:  1
   --------------
-  minimum time:     71.801 ms (0.00% GC)
-  median time:      77.600 ms (0.00% GC)
-  mean time:        77.816 ms (0.00% GC)
-  maximum time:     94.399 ms (0.00% GC)
+  minimum time:     69.892 ms (0.00% GC)
+  median time:      73.658 ms (0.00% GC)
+  mean time:        73.792 ms (0.00% GC)
+  maximum time:     77.551 ms (0.00% GC)
   --------------
-  samples:          65
+  samples:          68
   evals/sample:     1
 </pre></div>
 </div>
