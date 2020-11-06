@@ -17,13 +17,24 @@ Traceback (most recent call last):
     raise CellExecutionError.from_cell_and_msg(cell, exec_reply['content'])
 nbclient.exceptions.CellExecutionError: An error occurred while executing the following cell:
 ------------------
-methods(Point)
+N = 100
+
+θ0 = 0.111
+spins = [(cos(x), sin(x), 0.0) for x in rand(Float64[θ0, θ0+2π/3, θ0-2π/3], N)]
+
+function compute_m_120degrees2(spins)
+    cos_sum = sum([cos(3*atan(x[2], x[1])) for x in spins])
+    sin_sum = sum([sin(3*atan(x[2], x[1])) for x in spins])
+    (cos_sum^2 + sin_sum^2)/length(spins)^2
+end
+
+compute_m_120degrees(spins)
 ------------------
 
-UndefVarError: Point not defined
+UndefVarError: compute_m_120degrees not defined
 
 Stacktrace:
- [1] top-level scope at In[13]:1
+ [1] top-level scope at In[2]:12
  [2] include_string(::Function, ::Module, ::String, ::String) at ./loading.jl:1091
-LoadError: UndefVarError: Point not defined
+LoadError: UndefVarError: compute_m_120degrees not defined
 
