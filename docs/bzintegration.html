@@ -301,14 +301,10 @@ Note: The desired accuracy was reached
  1: 127.56384239093332 ± 0.012745344451511759 (prob.: 0.0)
  2: 124.02479357916016 ± 0.012127496929582178 (prob.: 0.0)
  3: 120.48675897098559 ± 0.012034784667174454 (prob.: 0.0)
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Integrand evaluations: 639191
+Integrand evaluations: 639191
 Number of subregions:  2517
 Note: The desired accuracy was reached
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>[0.5142662069128023, 0.4999987375860929, 0.48573535696216874]
+[0.5142662069128023, 0.4999987375860929, 0.48573535696216874]
 </pre></div>
 </div>
 </div>
@@ -371,16 +367,25 @@ Our strategy is to integrate out wave vectors one by one.</p>
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="c">#β = 10.0</span>
-<span class="c">#@time res = adaptive_bz_integration((x,f)-&gt;f.=nk(x...), length(ϵ0))</span>
-<span class="c">#res ./(2π)^3</span>
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="n">β</span> <span class="o">=</span> <span class="mf">10.0</span>
+<span class="nd">@time</span> <span class="n">res</span> <span class="o">=</span> <span class="n">adaptive_bz_integration</span><span class="p">((</span><span class="n">x</span><span class="p">,</span><span class="n">f</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">f</span><span class="o">.=</span><span class="n">nk</span><span class="p">(</span><span class="n">x</span><span class="o">...</span><span class="p">),</span> <span class="n">length</span><span class="p">(</span><span class="n">ϵ0</span><span class="p">))</span>
+<span class="n">res</span> <span class="o">./</span><span class="p">(</span><span class="mi">2</span><span class="nb">π</span><span class="p">)</span><span class="o">^</span><span class="mi">3</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>101.319498 seconds (1.79 G allocations: 49.498 GiB, 6.49% gc time)
+</pre></div>
+</div>
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>([0.5142690494629448, 0.49999999999734934, 0.48573095052886617], [3.5679912142253788e-9, 4.4316624753774944e-10, 2.888566998015395e-13])
 </pre></div>
 </div>
 </div>
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="c">#β = 100.0</span>
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="c">#This may take 10+ mins.</span>
+<span class="c">#β = 100.0</span>
 <span class="c">#@time res = adaptive_bz_integration((x,f)-&gt;f.=nk(x...), length(ϵ0))</span>
 <span class="c">#res ./(2π)^3</span>
 </pre></div>
