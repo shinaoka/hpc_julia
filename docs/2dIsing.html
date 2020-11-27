@@ -206,7 +206,29 @@
             <i class="fas fa-list"></i> Contents
         </div>
         <nav id="bd-toc-nav">
-            
+            <ul class="nav section-nav flex-column">
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#very-optimized-implementation-for-nearest-neighbor-2d-model">
+   Very optimized implementation for nearest-neighbor 2D model
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#implementatin-for-general-models-1">
+   Implementatin for general models 1
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#exercise-1">
+   Exercise 1
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#exercise-2">
+   Exercise 2
+  </a>
+ </li>
+</ul>
+
         </nav>
     </div>
 </div>
@@ -239,6 +261,8 @@ The thermodynamic properties of the 2D Ising model are qualitatively different f
 </div>
 </div>
 </div>
+<div class="section" id="very-optimized-implementation-for-nearest-neighbor-2d-model">
+<h2>Very optimized implementation for nearest-neighbor 2D model<a class="headerlink" href="#very-optimized-implementation-for-nearest-neighbor-2d-model" title="Permalink to this headline">¶</a></h2>
 <p>In the cell below, you can find <a class="reference external" href="https://nbviewer.jupyter.org/gist/genkuroki/79fd71a75b46303347bed4e52aaa2ba6">a very optimized code for the 2D Ising model written by Gen Kuroki</a>.
 On my laptop (Macbook Pro 16-inchi 2019), using &#64;invounds, &#64;simd improves the performance around 7%.
 But, they are dropped in the cell below.
@@ -286,22 +310,24 @@ The following code was modified from the original code to use the same update al
   memory estimate:  160 bytes
   allocs estimate:  1
   --------------
-  minimum time:     55.724 ms (0.00% GC)
-  median time:      59.749 ms (0.00% GC)
-  mean time:        60.413 ms (0.00% GC)
-  maximum time:     75.154 ms (0.00% GC)
+  minimum time:     50.690 ms (0.00% GC)
+  median time:      52.490 ms (0.00% GC)
+  mean time:        53.073 ms (0.00% GC)
+  maximum time:     61.923 ms (0.00% GC)
   --------------
-  samples:          83
+  samples:          95
   evals/sample:     1
 </pre></div>
 </div>
 </div>
 </div>
+</div>
+<div class="section" id="implementatin-for-general-models-1">
+<h2>Implementatin for general models 1<a class="headerlink" href="#implementatin-for-general-models-1" title="Permalink to this headline">¶</a></h2>
 <p>We focus on the nearest-neighbor interaction in this section.
 But, you may want to introduce further neighbor interactions in the future.
 You will learn how to implement a general Monte Carlo code in this section.
 We first define a struc for storing the spatial structure of the interactions.</p>
-<p>The core of the following code is **</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="k">module</span> <span class="n">MC</span>
@@ -311,7 +337,7 @@ We first define a struc for storing the spatial structure of the interactions.</
     <span class="n">coord_num</span><span class="o">::</span><span class="kt">Int8</span>
 <span class="k">end</span>
 
-<span class="c"># Compute energy</span>
+<span class="c"># Compute effective field</span>
 <span class="n">compute_effective_field</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">ispin</span><span class="p">,</span> <span class="n">jmodel</span><span class="p">)</span> <span class="o">=</span>
     <span class="n">sum</span><span class="p">((</span><span class="n">s</span><span class="p">[</span><span class="n">jmodel</span><span class="o">.</span><span class="n">connected_sites</span><span class="p">[</span><span class="n">j</span><span class="p">,</span> <span class="n">ispin</span><span class="p">]]</span> <span class="k">for</span> <span class="n">j</span> <span class="kp">in</span> <span class="mi">1</span><span class="o">:</span><span class="n">jmodel</span><span class="o">.</span><span class="n">coord_num</span><span class="p">))</span>
 
@@ -342,8 +368,7 @@ We first define a struc for storing the spatial structure of the interactions.</
 <span class="s">&quot;&quot;&quot;</span>
 <span class="k">function</span> <span class="n">nn_model_2D</span><span class="p">(</span><span class="n">L</span><span class="p">)</span>
     <span class="n">sites</span> <span class="o">=</span> <span class="kt">Array</span><span class="p">{</span><span class="kt">Int32</span><span class="p">,</span><span class="mi">2</span><span class="p">}(</span><span class="n">undef</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="n">L</span><span class="o">^</span><span class="mi">2</span><span class="p">)</span>
-    <span class="n">mymod</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">=</span> <span class="n">mod</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="n">L</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">L</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
-    <span class="n">to_site_idx</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">)</span> <span class="o">=</span> <span class="n">mymod</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">+</span> <span class="n">L</span><span class="o">*</span><span class="p">(</span><span class="n">mymod</span><span class="p">(</span><span class="n">j</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">to_site_idx</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">)</span> <span class="o">=</span> <span class="n">mod1</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">L</span><span class="p">)</span> <span class="o">+</span> <span class="n">L</span><span class="o">*</span><span class="p">(</span><span class="n">mod1</span><span class="p">(</span><span class="n">j</span><span class="p">,</span> <span class="n">L</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
     <span class="n">disp</span> <span class="o">=</span> <span class="p">[[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]]</span>
     <span class="k">for</span> <span class="n">j</span> <span class="kp">in</span> <span class="mi">1</span><span class="o">:</span><span class="n">L</span><span class="p">,</span> <span class="n">i</span> <span class="kp">in</span> <span class="mi">1</span><span class="o">:</span><span class="n">L</span>
         <span class="n">isite</span> <span class="o">=</span> <span class="n">to_site_idx</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">)</span>
@@ -376,18 +401,27 @@ We first define a struc for storing the spatial structure of the interactions.</
   memory estimate:  160 bytes
   allocs estimate:  1
   --------------
-  minimum time:     61.027 ms (0.00% GC)
-  median time:      67.081 ms (0.00% GC)
-  mean time:        67.864 ms (0.00% GC)
-  maximum time:     87.370 ms (0.00% GC)
+  minimum time:     58.572 ms (0.00% GC)
+  median time:      59.651 ms (0.00% GC)
+  mean time:        60.149 ms (0.00% GC)
+  maximum time:     67.509 ms (0.00% GC)
   --------------
-  samples:          74
+  samples:          84
   evals/sample:     1
 </pre></div>
 </div>
 </div>
 </div>
 <p>This general code runs slower than the original code only by around 6% although the structure of the interactions is not hardcoded.</p>
+</div>
+<div class="section" id="exercise-1">
+<h2>Exercise 1<a class="headerlink" href="#exercise-1" title="Permalink to this headline">¶</a></h2>
+<p>Simuate the nearest-neighbor 3D Ising model by implementing <code class="docutils literal notranslate"><span class="pre">nn_model_3D</span></code> based on <code class="docutils literal notranslate"><span class="pre">nn_model_2D</span></code>.</p>
+</div>
+<div class="section" id="exercise-2">
+<h2>Exercise 2<a class="headerlink" href="#exercise-2" title="Permalink to this headline">¶</a></h2>
+<p>Introduce next nearest neighbor interaction <span class="math notranslate nohighlight">\(J_2\)</span> by extending JModel and exercisewriting <code class="docutils literal notranslate"><span class="pre">nnn_model_2D</span></code> based on <code class="docutils literal notranslate"><span class="pre">nn_model_2D</span></code>.</p>
+</div>
 </div>
 
     <script type="text/x-thebe-config">
