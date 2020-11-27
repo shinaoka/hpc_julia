@@ -1,0 +1,446 @@
+
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>BZ integration &#8212; HPC exercise in Julia</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/all.min.css" integrity="sha384-KA6wR/X5RY4zFAHpv/CnoG2UW1uogYfdnP67Uv7eULvTveboZJg0qUpmJZb5VqzN" crossorigin="anonymous">
+    <link href="../_static/css/index.css" rel="stylesheet">
+    <link rel="stylesheet" href="../_static/sphinx-book-theme.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/mystnb.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-thebe.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/spanels-index--0afa1ebdab0bb23b98b56d34c23d9f57.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/spanels-variables--ffc7f74dcb1b9eecba2dbcbc22818714.css" />
+    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/language_data.js"></script>
+    <script src="../_static/togglebutton.js"></script>
+    <script src="../_static/clipboard.min.js"></script>
+    <script src="../_static/copybutton.js"></script>
+    <script src="../_static/sphinx-book-theme.js"></script>
+    <script >var togglebuttonSelector = '.toggle, .admonition.dropdown, .tag_hide_input div.cell_input, .tag_hide-input div.cell_input, .tag_hide_output div.cell_output, .tag_hide-output div.cell_output, .tag_hide_cell.cell, .tag_hide-cell.cell';</script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["\\(", "\\)"]], "displayMath": [["\\[", "\\]"]], "processRefs": false, "processEnvironments": false}})</script>
+    <script async="async" src="https://unpkg.com/thebelab@latest/lib/index.js"></script>
+    <script >
+        const thebe_selector = ".thebe"
+        const thebe_selector_input = "pre"
+        const thebe_selector_output = ".output"
+    </script>
+    <script async="async" src="../_static/sphinx-thebe.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="prev" title="2D Ising model" href="2dIsing.html" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="docsearch:language" content="en">
+
+
+
+  </head>
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="80">
+    
+
+    <div class="container-xl">
+      <div class="row">
+          
+<div class="col-12 col-md-3 bd-sidebar site-navigation show" id="site-navigation">
+    
+        <div class="navbar-brand-box">
+<a class="navbar-brand text-wrap" href="../index.html">
+  
+  
+  <h1 class="site-logo" id="site-title">HPC exercise in Julia</h1>
+  
+</a>
+</div>
+
+<form class="bd-search d-flex align-items-center" action="../search.html" method="get">
+  <i class="icon fas fa-search"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search this book..." aria-label="Search this book..." autocomplete="off" >
+</form>
+
+<nav class="bd-links" id="bd-docs-nav" aria-label="Main navigation">
+  <p class="caption">
+ <span class="caption-text">
+  Introduction
+ </span>
+</p>
+<ul class="nav sidenav_l1">
+ <li class="toctree-l1">
+  <a class="reference internal" href="preparation.html">
+   Preparation
+  </a>
+ </li>
+</ul>
+<p class="caption">
+ <span class="caption-text">
+  Classical Monte Carlo simulation
+ </span>
+</p>
+<ul class="current nav sidenav_l1">
+ <li class="toctree-l1">
+  <a class="reference internal" href="mc.html">
+   概要
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="1dIsing.html">
+   1D Ising model
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="2dIsing.html">
+   2D Ising model
+  </a>
+ </li>
+ <li class="toctree-l1 current active">
+  <a class="current reference internal" href="#">
+   BZ integration
+  </a>
+ </li>
+</ul>
+
+</nav>
+
+ <!-- To handle the deprecated key -->
+
+<div class="navbar_extra_footer">
+  Powered by <a href="https://jupyterbook.org">Jupyter Book</a>
+</div>
+
+</div>
+
+
+          
+
+
+          
+<main class="col py-md-3 pl-md-4 bd-content overflow-auto" role="main">
+    
+    <div class="row topbar fixed-top container-xl">
+    <div class="col-12 col-md-3 bd-topbar-whitespace site-navigation show">
+    </div>
+    <div class="col pl-2 topbar-main">
+        
+        <button id="navbar-toggler" class="navbar-toggler ml-0" type="button" data-toggle="collapse"
+            data-toggle="tooltip" data-placement="bottom" data-target=".site-navigation" aria-controls="navbar-menu"
+            aria-expanded="true" aria-label="Toggle navigation" aria-controls="site-navigation"
+            title="Toggle navigation" data-toggle="tooltip" data-placement="left">
+            <i class="fas fa-bars"></i>
+            <i class="fas fa-arrow-left"></i>
+            <i class="fas fa-arrow-up"></i>
+        </button>
+        
+        <div class="dropdown-buttons-trigger">
+    <button id="dropdown-buttons-trigger" class="btn btn-secondary topbarbtn" aria-label="Download this page"><i
+            class="fas fa-download"></i></button>
+
+    
+    <div class="dropdown-buttons">
+        <!-- ipynb file if we had a myst markdown file -->
+        
+        <!-- Download raw file -->
+        <a class="dropdown-buttons" href="../_sources/docs/bzintegration.ipynb"><button type="button"
+                class="btn btn-secondary topbarbtn" title="Download source file" data-toggle="tooltip"
+                data-placement="left">.ipynb</button></a>
+        <!-- Download PDF via print -->
+        <button type="button" id="download-print" class="btn btn-secondary topbarbtn" title="Print to PDF"
+            onClick="window.print()" data-toggle="tooltip" data-placement="left">.pdf</button>
+    </div>
+    
+</div>
+        <!-- Source interaction buttons -->
+
+
+        <!-- Full screen (wrap in <a> to have style consistency -->
+        <a class="full-screen-button"><button type="button" class="btn btn-secondary topbarbtn" data-toggle="tooltip"
+                data-placement="bottom" onclick="toggleFullScreen()" title="Fullscreen mode"><i
+                    class="fas fa-expand"></i></button></a>
+
+        <!-- Launch buttons -->
+
+<div class="dropdown-buttons-trigger">
+    <button id="dropdown-buttons-trigger" class="btn btn-secondary topbarbtn"
+        aria-label="Launch interactive content"><i class="fas fa-rocket"></i></button>
+    <div class="dropdown-buttons">
+        
+        <a class="binder-button" href="https://mybinder.org/v2/gh/shinaoka/hpc_julia.git/master?urlpath=tree/docs/bzintegration.ipynb"><button type="button"
+                class="btn btn-secondary topbarbtn" title="Launch Binder" data-toggle="tooltip"
+                data-placement="left"><img class="binder-button-logo"
+                    src="../_static/images/logo_binder.svg"
+                    alt="Interact on binder">Binder</button></a>
+        
+        
+        
+        <a class="colab-button" href="https://colab.research.google.com/github/shinaoka/hpc_julia.git/blob/master/docs/bzintegration.ipynb"><button type="button" class="btn btn-secondary topbarbtn"
+                title="Launch Colab" data-toggle="tooltip" data-placement="left"><img class="colab-button-logo"
+                    src="../_static/images/logo_colab.png"
+                    alt="Interact on Colab">Colab</button></a>
+        
+        
+    </div>
+</div>
+
+    </div>
+
+    <!-- Table of contents -->
+    <div class="d-none d-md-block col-md-2 bd-toc show">
+        <div class="tocsection onthispage pt-5 pb-3">
+            <i class="fas fa-list"></i> Contents
+        </div>
+        <nav id="bd-toc-nav">
+            
+        </nav>
+    </div>
+</div>
+    <div id="main-content" class="row">
+        <div class="col-12 col-md-9 pl-md-3 pr-md-0">
+        
+              <div>
+                
+  <div class="section" id="bz-integration">
+<h1>BZ integration<a class="headerlink" href="#bz-integration" title="Permalink to this headline">¶</a></h1>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="k">using</span> <span class="n">PyPlot</span>
+<span class="k">using</span> <span class="n">Cuba</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>We want to perform numerical integralation of vector data over the BZ zone.
+This is not aways easy because the integrand can vary rapidly in small regions.
+Here, adaptive integral kicks in.
+For instance, we can integrate a function which evaluate to two normal distributions with different variances on the three-dimensional unit hypercube <span class="math notranslate nohighlight">\([0,1]^3\)</span>.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="n">norm_dist</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">σ</span><span class="p">)</span> <span class="o">=</span> <span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">sum</span><span class="p">(</span><span class="n">x</span><span class="o">.^</span><span class="mi">2</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">σ</span><span class="o">^</span><span class="mi">2</span><span class="p">))</span><span class="o">/</span><span class="p">(</span><span class="n">σ</span><span class="o">*</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span><span class="nb">π</span><span class="p">))</span><span class="o">^</span><span class="mi">3</span>
+<span class="k">function</span> <span class="n">norm_dist_v</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>
+    <span class="n">f</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">norm_dist</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="mf">0.01</span><span class="p">)</span>
+    <span class="n">f</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">norm_dist</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="mf">0.001</span><span class="p">)</span>
+<span class="k">end</span>
+<span class="n">cuhre</span><span class="p">(</span><span class="n">norm_dist_v</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Components:
+ 1: 0.12499894817062472 ± 7.896673363781687e-6 (prob.: 1.1102230246251565e-16)
+ 2: 0.12499977121633674 ± 8.42146746466239e-6 (prob.: 0.0)
+Integrand evaluations: 15875
+Number of subregions:  63
+Note: The desired accuracy was reached
+</pre></div>
+</div>
+</div>
+</div>
+<p>As a simple example, we consider a multi-orbital model with a cos-like band dispersion:</p>
+<div class="math notranslate nohighlight">
+\[
+\epsilon(b, k_x, k_y, k_z) = 2 \cos(k_x) + 2 \cos(k_y) + 2 \cos(k_z) + \epsilon_0(b).
+\]</div>
+<p>The corresponding orbital occupation is given by</p>
+<div class="math notranslate nohighlight">
+\[
+n(b, k_x, k_y, k_z) = \frac{1}{(2\pi)^3} \int_{-\pi}^\pi dk_x dk_y dk_z \frac{1}{1+\exp(\beta \epsilon(b, k_x, k_y, k_z))}.
+\]</div>
+<p>It is hard to integrate the orbital occupation at low <span class="math notranslate nohighlight">\(T\)</span>.</p>
+<p>First, we define <code class="docutils literal notranslate"><span class="pre">mycuhre</span></code> for numerical integraion on a general hypercube.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="k">function</span> <span class="n">mycuhre</span><span class="p">(</span><span class="n">integrand</span><span class="p">,</span> <span class="n">ndim</span><span class="p">,</span> <span class="n">ncomp</span><span class="p">,</span> <span class="n">xmin</span><span class="p">,</span> <span class="n">xmax</span><span class="p">)</span>
+    <span class="k">function</span> <span class="n">integrand_scaled</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>
+        <span class="n">integrand</span><span class="p">((</span><span class="n">xmax</span> <span class="o">-</span> <span class="n">xmin</span><span class="p">)</span><span class="o">*</span><span class="n">x</span> <span class="o">.+</span> <span class="n">xmin</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>
+        <span class="n">f</span> <span class="o">.*=</span> <span class="p">(</span><span class="n">xmax</span> <span class="o">-</span> <span class="n">xmin</span><span class="p">)</span><span class="o">^</span><span class="n">ndim</span>
+    <span class="k">end</span>
+    <span class="n">cuhre</span><span class="p">(</span><span class="n">integrand_scaled</span><span class="p">,</span> <span class="n">ndim</span><span class="p">,</span> <span class="n">ncomp</span><span class="p">,</span> <span class="n">maxevals</span><span class="o">=</span><span class="mi">100000000</span><span class="p">)</span>
+<span class="k">end</span>
+
+<span class="n">mycuhre</span><span class="p">(</span><span class="n">norm_dist_v</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Components:
+ 1: 1.000144412485981 ± 9.93436986411435e-5 (prob.: 0.0)
+ 2: 1.0000371976250122 ± 9.98556800753735e-5 (prob.: 1.1102230246251565e-16)
+Integrand evaluations: 226187
+Number of subregions:  891
+Note: The desired accuracy was reached
+</pre></div>
+</div>
+</div>
+</div>
+<p>This works great at high <span class="math notranslate nohighlight">\(T\)</span>. But, if we increase <span class="math notranslate nohighlight">\(\beta\)</span> to 100, you will not get correct results in the following cell.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="n">β</span> <span class="o">=</span> <span class="mf">10.0</span>
+<span class="n">ϵ0</span> <span class="o">=</span> <span class="p">[</span><span class="o">-</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">]</span>
+
+<span class="n">fdist</span><span class="p">(</span><span class="n">ϵ</span><span class="p">)</span> <span class="o">=</span> <span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">exp</span><span class="p">(</span><span class="n">β</span><span class="o">*</span><span class="n">ϵ</span><span class="p">))</span>
+<span class="n">ek</span><span class="p">(</span><span class="n">kx</span><span class="p">,</span> <span class="n">ky</span><span class="p">,</span> <span class="n">kz</span><span class="p">)</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">cos</span><span class="p">(</span><span class="n">kx</span><span class="p">)</span> <span class="o">+</span> <span class="n">cos</span><span class="p">(</span><span class="n">ky</span><span class="p">)</span> <span class="o">+</span> <span class="n">cos</span><span class="p">(</span><span class="n">kz</span><span class="p">))</span> <span class="o">.+</span> <span class="n">ϵ0</span>
+<span class="n">nk</span><span class="p">(</span><span class="n">kx</span><span class="p">,</span> <span class="n">ky</span><span class="p">,</span> <span class="n">kz</span><span class="p">)</span> <span class="o">=</span> <span class="n">fdist</span><span class="o">.</span><span class="p">(</span><span class="n">ek</span><span class="p">(</span><span class="n">kx</span><span class="p">,</span> <span class="n">ky</span><span class="p">,</span> <span class="n">kz</span><span class="p">))</span>
+
+<span class="n">r</span> <span class="o">=</span> <span class="n">mycuhre</span><span class="p">(</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">f</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">f</span><span class="o">.=</span><span class="n">nk</span><span class="p">(</span><span class="n">x</span><span class="o">...</span><span class="p">),</span> <span class="mi">3</span><span class="p">,</span> <span class="n">length</span><span class="p">(</span><span class="n">ϵ0</span><span class="p">),</span> <span class="o">-</span><span class="nb">π</span><span class="p">,</span> <span class="nb">π</span><span class="p">)</span>
+<span class="n">println</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
+<span class="n">println</span><span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">/</span><span class="p">(</span><span class="mi">2</span><span class="nb">π</span><span class="p">)</span><span class="o">^</span><span class="mi">3</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Components:
+ 1: 127.56384239093332 ± 0.012745344451511759 (prob.: 0.0)
+ 2: 124.02479357916016 ± 0.012127496929582178 (prob.: 0.0)
+ 3: 120.48675897098559 ± 0.012034784667174454 (prob.: 0.0)
+Integrand evaluations: 639191
+Number of subregions:  2517
+Note: The desired accuracy was reached
+[0.5142662069128023, 0.4999987375860929, 0.48573535696216874]
+</pre></div>
+</div>
+</div>
+</div>
+<p>This is because the orbital occupation is a nearly step function. See below.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="n">β</span> <span class="o">=</span> <span class="mf">100.0</span>
+<span class="n">kxs</span> <span class="o">=</span> <span class="n">range</span><span class="p">(</span><span class="o">-</span><span class="nb">π</span><span class="p">,</span> <span class="nb">π</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
+<span class="n">ys</span> <span class="o">=</span> <span class="p">[</span><span class="n">nk</span><span class="p">(</span><span class="n">kx</span><span class="p">,</span> <span class="mf">0.5</span><span class="nb">π</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">)</span> <span class="k">for</span> <span class="n">kx</span> <span class="kp">in</span> <span class="n">kxs</span><span class="p">]</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">kxs</span><span class="p">,</span> <span class="n">ys</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="n">raw</span><span class="s">&quot;</span><span class="si">$k_x</span><span class="s">$&quot;</span><span class="p">)</span>
+<span class="p">;</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/bzintegration_9_0.png" src="../_images/bzintegration_9_0.png" />
+</div>
+</div>
+<p>A commonstrategy is to use <strong>the tetrahedron method</strong>.
+The tetrahedron method relys on linear interpolation of band dispersions, which are very smooth functions.
+In this note, however, we strick to adaptive numerical integration.
+Our strategy is to integrate out wave vectors one by one.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="k">using</span> <span class="n">Cubature</span>
+<span class="n">hquadrature</span><span class="p">(</span><span class="n">length</span><span class="p">(</span><span class="n">ϵ0</span><span class="p">),</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">f</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">f</span><span class="o">.=</span><span class="n">nk</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mf">0.5</span><span class="nb">π</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">),</span> <span class="o">-</span><span class="nb">π</span><span class="p">,</span> <span class="nb">π</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>([0.7508236899342619, 0.3874311949621099, 0.00043305916104926113], [2.08208417964383e-11, 1.7437834083154254e-9, 4.95352590822916e-18])
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="k">function</span> <span class="n">adaptive_bz_integration</span><span class="p">(</span><span class="n">integrand</span><span class="p">,</span> <span class="n">ncomp</span><span class="p">)</span>
+    <span class="k">function</span> <span class="n">integrand_kxky</span><span class="p">(</span><span class="n">kxky</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>
+        <span class="n">kx</span><span class="p">,</span> <span class="n">ky</span> <span class="o">=</span> <span class="n">kxky</span>
+        <span class="n">v</span><span class="p">,</span> <span class="nb">e</span> <span class="o">=</span> <span class="n">hquadrature</span><span class="p">(</span><span class="n">ncomp</span><span class="p">,</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">f_</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">integrand</span><span class="p">([</span><span class="n">kx</span><span class="p">,</span> <span class="n">ky</span><span class="p">,</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]],</span> <span class="n">f_</span><span class="p">),</span> <span class="o">-</span><span class="nb">π</span><span class="p">,</span> <span class="nb">π</span><span class="p">)</span>
+        <span class="n">f</span> <span class="o">.=</span> <span class="n">v</span>
+    <span class="k">end</span>
+    <span class="k">function</span> <span class="n">integrand_kx</span><span class="p">(</span><span class="n">kx</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>
+        <span class="n">v</span><span class="p">,</span> <span class="nb">e</span> <span class="o">=</span> <span class="n">hquadrature</span><span class="p">(</span><span class="n">ncomp</span><span class="p">,</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">f_</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">integrand_kxky</span><span class="p">([</span><span class="n">kx</span><span class="p">,</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]],</span><span class="n">f_</span><span class="p">),</span> <span class="o">-</span><span class="nb">π</span><span class="p">,</span> <span class="nb">π</span><span class="p">)</span>
+        <span class="n">f</span> <span class="o">.=</span> <span class="n">v</span>
+    <span class="k">end</span>
+    <span class="n">hquadrature</span><span class="p">(</span><span class="n">ncomp</span><span class="p">,</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">f</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">integrand_kx</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="n">f</span><span class="p">),</span> <span class="o">-</span><span class="nb">π</span><span class="p">,</span> <span class="nb">π</span><span class="p">)</span>
+<span class="k">end</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>adaptive_bz_integration (generic function with 1 method)
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="n">β</span> <span class="o">=</span> <span class="mf">10.0</span>
+<span class="nd">@time</span> <span class="n">res</span> <span class="o">=</span> <span class="n">adaptive_bz_integration</span><span class="p">((</span><span class="n">x</span><span class="p">,</span><span class="n">f</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">f</span><span class="o">.=</span><span class="n">nk</span><span class="p">(</span><span class="n">x</span><span class="o">...</span><span class="p">),</span> <span class="n">length</span><span class="p">(</span><span class="n">ϵ0</span><span class="p">))</span>
+<span class="n">res</span> <span class="o">./</span><span class="p">(</span><span class="mi">2</span><span class="nb">π</span><span class="p">)</span><span class="o">^</span><span class="mi">3</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span> 91.002551 seconds (1.78 G allocations: 49.263 GiB, 6.58% gc time)
+</pre></div>
+</div>
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>([0.5142690494629448, 0.49999999999734934, 0.48573095052886617], [3.5679912142253788e-9, 4.4316624753774944e-10, 2.888566998015395e-13])
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="c">#β = 100.0</span>
+<span class="c">#@time res = adaptive_bz_integration((x,f)-&gt;f.=nk(x...), length(ϵ0))</span>
+<span class="c">#res ./(2π)^3</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+
+    <script type="text/x-thebe-config">
+    {
+        requestKernel: true,
+        binderOptions: {
+            repo: "binder-examples/jupyter-stacks-datascience",
+            ref: "master",
+        },
+        codeMirrorConfig: {
+            theme: "abcdef",
+            mode: "julia-1.5"
+        },
+        kernelOptions: {
+            kernelName: "julia-1.5",
+            path: "./docs"
+        },
+        predefinedOutput: true
+    }
+    </script>
+    <script>kernelName = 'julia-1.5'</script>
+
+              </div>
+              
+        </div>
+    </div>
+    
+    
+    <div class='prev-next-bottom'>
+        
+    <a class='left-prev' id="prev-link" href="2dIsing.html" title="previous page">2D Ising model</a>
+
+    </div>
+    <footer class="footer mt-5 mt-md-0">
+    <div class="container">
+      <p>
+        
+          By Hiroshi Shinaoka<br/>
+        
+            &copy; Copyright 2020.<br/>
+      </p>
+    </div>
+  </footer>
+</main>
+
+
+      </div>
+    </div>
+
+    <script src="../_static/js/index.js"></script>
+    
+  </body>
+</html>

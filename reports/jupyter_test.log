@@ -36,5 +36,11 @@ UndefVarError: compute_m_120degrees not defined
 Stacktrace:
  [1] top-level scope at In[2]:12
  [2] include_string(::Function, ::Module, ::String, ::String) at ./loading.jl:1091
+ [3] execute_code(::String, ::String) at /Users/hiroshi/.julia/packages/IJulia/a1SNk/src/execute_request.jl:27
+ [4] execute_request(::ZMQ.Socket, ::IJulia.Msg) at /Users/hiroshi/.julia/packages/IJulia/a1SNk/src/execute_request.jl:86
+ [5] #invokelatest#1 at ./essentials.jl:710 [inlined]
+ [6] invokelatest at ./essentials.jl:709 [inlined]
+ [7] eventloop(::ZMQ.Socket) at /Users/hiroshi/.julia/packages/IJulia/a1SNk/src/eventloop.jl:8
+ [8] (::IJulia.var"#15#18")() at ./task.jl:356
 LoadError: UndefVarError: compute_m_120degrees not defined
 
