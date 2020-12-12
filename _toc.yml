@@ -9,3 +9,8 @@
   chapters:
   - file: docs/mc
   - file: docs/1dIsing
+  - file: docs/2dIsing
+
+- part: Quantum Mechanics
+  chapters:
+  - file: docs/bzintegration

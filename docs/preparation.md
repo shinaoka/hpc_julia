@@ -34,6 +34,7 @@ Pkg.add("Plots")
 Pkg.add("PyCall")
 Pkg.add("HDF5")
 Pkg.add("Profile")
+Pkg.add("Revise")
 ```
 
 実行はシェル上でこんな感じ。
